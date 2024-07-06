@@ -38,7 +38,7 @@ public class TextureWandPaletteScreen extends Screen {
 
     SearchWidget searchWidget;
 
-    Block selectedBlock;
+    public Block selectedBlock;
     Block searchResult;
 
     ResourceLocation menuBg = new ResourceLocation(BuildingGizmos.MODID,"textures/screen/blanksquare.png");
@@ -59,10 +59,6 @@ public class TextureWandPaletteScreen extends Screen {
 
     public TextureWandPaletteScreen(Component pTitle) {
         super(pTitle);
-    }
-
-    public interface setBlock {
-        public void set(Block block);
     }
 
     @Override
@@ -112,7 +108,8 @@ public class TextureWandPaletteScreen extends Screen {
         this.paletteData = new PaletteData();
         this.selectedBlock = Blocks.STONE;
         this.searchResult = Blocks.STONE;
-        this.testBlockList = ((TextureWand) (Minecraft.getInstance().player.getMainHandItem().getItem())).getPaletteBlocks(Minecraft.getInstance().player.getMainHandItem());
+        ItemStack wand = Minecraft.getInstance().player.getMainHandItem();
+        this.testBlockList = ((TextureWand) wand.getItem()).getPaletteBlocks(wand);
 
         //Explorer widget in top right quadrant of screen
         //needs to be a square, with badding around edge
@@ -191,6 +188,7 @@ public class TextureWandPaletteScreen extends Screen {
                 testBlockList.remove(testScrollWidget.getScrollN()+testScrollWidget.selectedslot);
                 if(testScrollWidget.getN() > 0){
                     testScrollWidget.setN(testScrollWidget.getN()-1);
+                    testScrollWidget.scrollSubWidget.scrolltoN(testScrollWidget.getScrollN()-1);
                 }
             }
             //testScrollWidget.setN(testScrollWidget.getN() -1); //decrement N as you decreased size of list

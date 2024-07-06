@@ -49,7 +49,7 @@ public class QuantizedScrollSubWidget extends AbstractWidget {
         scrolltoN(N);
     }
 
-    private void scrolltoN(int n) {
+    public void scrolltoN(int n) {
         this.scrollslot = n;
     }
 

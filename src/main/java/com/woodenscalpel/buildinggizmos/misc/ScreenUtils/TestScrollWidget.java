@@ -1,4 +1,4 @@
-package com.woodenscalpel.buildinggizmos.common.item;
+package com.woodenscalpel.buildinggizmos.misc.ScreenUtils;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;

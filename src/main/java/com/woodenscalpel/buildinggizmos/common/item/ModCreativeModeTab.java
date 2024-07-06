@@ -7,7 +7,7 @@ public class ModCreativeModeTab {
     public static final CreativeModeTab TAB_BUILDINGGIZMOS = new CreativeModeTab("buildinggizmostab") {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(ModItems.TESTITEM.get());
+            return new ItemStack(ModItems.TEXTUREWAND.get());
         }
     };
 }

@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.misc.SetBlockInterface;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.core.Direction;
@@ -140,6 +141,7 @@ public class ExplorerWidgetCallback extends AbstractWidget {
 
             int vsize = (int) ((int6 - int5) / ratio);
             int usize = (int) ((int4 - int3) / ratio);
+
 
             RenderSystem.setShaderTexture(0, texture2);
             poseStack.pushPose();
