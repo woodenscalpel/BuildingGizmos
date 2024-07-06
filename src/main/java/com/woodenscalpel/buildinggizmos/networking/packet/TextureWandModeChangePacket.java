@@ -1,5 +1,6 @@
 package com.woodenscalpel.buildinggizmos.networking.packet;
 
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -33,7 +34,7 @@ public class TextureWandModeChangePacket {
             ServerLevel level = player.getLevel();
 
             ItemStack item = player.getMainHandItem();
-            ((TextureWand) item.getItem()).switchMode(player);
+            ((AbstractWand) item.getItem()).switchMode(player);
         });
         return true;
 

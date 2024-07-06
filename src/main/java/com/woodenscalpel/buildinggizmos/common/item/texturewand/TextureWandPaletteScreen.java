@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.common.item.palettescreen.*;
 import com.woodenscalpel.buildinggizmos.misc.SetBlockInterface;
 import com.woodenscalpel.buildinggizmos.networking.Messages;
@@ -109,7 +110,7 @@ public class TextureWandPaletteScreen extends Screen {
         this.selectedBlock = Blocks.STONE;
         this.searchResult = Blocks.STONE;
         ItemStack wand = Minecraft.getInstance().player.getMainHandItem();
-        this.testBlockList = ((TextureWand) wand.getItem()).getPaletteBlocks(wand);
+        this.testBlockList = ((AbstractWand) wand.getItem()).getPaletteBlocks(wand);
 
         //Explorer widget in top right quadrant of screen
         //needs to be a square, with badding around edge

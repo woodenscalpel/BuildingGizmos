@@ -2,6 +2,7 @@ package com.woodenscalpel.buildinggizmos.client;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.keys.KeyBinding;
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
 import com.woodenscalpel.buildinggizmos.networking.Messages;
 import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandModeChangePacket;
@@ -25,17 +26,17 @@ public class ClientEvents {
             Player player = Minecraft.getInstance().player;
             if(player != null) {
                 ItemStack item = player.getMainHandItem();
-                if (item.getItem() instanceof TextureWand) {
+                if (item.getItem() instanceof AbstractWand) {
 
                     if (KeyBinding.MODE_SWITCH_KEY.consumeClick()) {
                         //player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
-                        ((TextureWand) item.getItem()).switchMode(player);
+                        ((AbstractWand) item.getItem()).switchMode(player);
                         Messages.sendToServer(new TextureWandModeChangePacket());
                     }
 
                     if (KeyBinding.PALLET_MENU_KEY.consumeClick()) {
                         player.sendSystemMessage(Component.literal("Pressed Pallet Menu"));
-                        ((TextureWand) item.getItem()).openPalletScreen();
+                        ((AbstractWand) item.getItem()).openPalletScreen();
                     }
 
                 }

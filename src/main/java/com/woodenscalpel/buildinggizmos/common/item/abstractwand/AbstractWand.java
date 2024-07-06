@@ -1,8 +1,6 @@
 package com.woodenscalpel.buildinggizmos.common.item.abstractwand;
 
-import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
-import com.woodenscalpel.buildinggizmos.misc.InteractionLayer.WorldInventoryInterface;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
 import net.minecraft.core.BlockPos;
@@ -11,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -19,14 +16,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +40,11 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     public AbstractWand(Properties pProperties) {
         super(pProperties.stacksTo(1));
     }
+
+    public void openPalletScreen(){
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT,() -> ClientHooks::openTextureWandScreen);
+    }
+
     @Override
     public @NotNull InteractionResult useOn(UseOnContext context) {
         //LOGGER.info("USED ON");
@@ -64,13 +63,17 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
                     BlockPos b1 = helpers.intarray2blockpos(nbt.getIntArray("P1"));
                     BlockPos b2 = helpers.intarray2blockpos(nbt.getIntArray("P2"));
+
+                    List<BlockPos> controlPoints = new ArrayList<>();
+                    controlPoints.add(b1);
+                    controlPoints.add(b2);
+
                     Box area = new Box(b1,b2);
 
                     BlockPos blockClicked = context.getClickedPos();
                     if (area.contains(context.getClickedPos())) {
 
-
-                        helpers.putBlockList(nbt,"blockQueue",area.getBlockList());
+                        setBlockQueue(controlPoints,nbt);
                         nbt.putInt("state", IN_USE);
                     }
                     else{
@@ -112,14 +115,24 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
         return super.useOn(context);
     }
 
+
     @Override
     public void inventoryTick(ItemStack itemStack, Level level, Entity entity, int i, boolean b) {
         if (!level.isClientSide()) {
             CompoundTag nbt = itemStack.getOrCreateTag();
 
             if (nbt.getInt("state") == IN_USE) {
+
                 //LOGGER.info("USING!");
                 int[] rawBlockQueue = nbt.getIntArray("blockQueue");
+
+                if(rawBlockQueue.length < 3) {
+
+                    nbt.putInt("state", SELECTING_P1);
+                }
+
+            if (nbt.getInt("state") == IN_USE) {
+
                 BlockPos nextblock = new BlockPos(rawBlockQueue[0],rawBlockQueue[1],rawBlockQueue[2]);
                 nbt.putIntArray("blockQueue",helpers.arraySlice(rawBlockQueue,3,rawBlockQueue.length));
 
@@ -128,11 +141,8 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                 }
 
 
-                if(rawBlockQueue.length < 4) {
 
-                    nbt.putInt("state", SELECTING_P1);
-                }
-            }
+            }}
             super.inventoryTick(itemStack, level, entity, i, b);
         }
     }
@@ -200,5 +210,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     }
 
     protected abstract void processCoord(Player player, Level level, ItemStack itemStack, BlockPos nextblock);
+
+    protected abstract void setBlockQueue(List<BlockPos> controlPoints, CompoundTag nbt);
 }
 

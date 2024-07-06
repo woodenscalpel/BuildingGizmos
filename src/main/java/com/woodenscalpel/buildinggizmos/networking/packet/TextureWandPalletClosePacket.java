@@ -1,5 +1,6 @@
 package com.woodenscalpel.buildinggizmos.networking.packet;
 
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -38,7 +39,7 @@ public class TextureWandPalletClosePacket {
 
             ItemStack item = player.getMainHandItem();
 
-            ((TextureWand) item.getItem()).savePalette(itemstacks,item);
+            ((AbstractWand) item.getItem()).savePalette(itemstacks,item);
 
 
             //((TextureWand) item.getItem()).switchMode();
