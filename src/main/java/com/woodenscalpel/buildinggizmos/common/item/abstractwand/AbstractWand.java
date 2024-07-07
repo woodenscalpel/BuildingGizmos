@@ -73,7 +73,6 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                     BlockPos blockClicked = context.getClickedPos();
                     if (area.contains(context.getClickedPos())) {
 
-                        setBlockQueue(controlPoints,nbt);
                         nbt.putInt("state", IN_USE);
                     }
                     else{
@@ -103,6 +102,15 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                         nbt.putInt("state", SELECTING_P1);
                         nbt.putBoolean("ready", true);
 
+                        BlockPos b1 = helpers.intarray2blockpos(nbt.getIntArray("P1"));
+                        BlockPos b2 = helpers.intarray2blockpos(nbt.getIntArray("P2"));
+
+                        List<BlockPos> controlPoints = new ArrayList<>();
+                        controlPoints.add(b1);
+                        controlPoints.add(b2);
+
+                        setBlockQueue(controlPoints,nbt);
+                        //nbt.putIntArray("blockQueue",helpers.arraySlice(rawBlockQueue,3,rawBlockQueue.length));
                         //LOGGER.info("set P2");
 
                         break;

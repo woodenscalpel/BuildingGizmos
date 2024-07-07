@@ -4,35 +4,20 @@ import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.misc.InteractionLayer.WorldInventoryInterface;
-import com.woodenscalpel.buildinggizmos.misc.Quantization.Bresenhm3D;
+import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedCircle;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
-import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.fml.DistExecutor;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 
 public class BuildWand extends AbstractWand {
@@ -53,9 +38,12 @@ public class BuildWand extends AbstractWand {
     }
 
     @Override
-    protected void processCoord(Player player, Level level, ItemStack itemStack, BlockPos nextblock) {
+    protected void processCoord(Player player, Level level, ItemStack wand, BlockPos nextblock) {
 
-        WorldInventoryInterface.placeBlock(player, Blocks.STONE.asItem().getDefaultInstance(),level,nextblock);
+        ItemStack item = getRandomFromPallet(player,wand);
+
+        //WorldInventoryInterface.placeBlock(player, Blocks.STONE.asItem().getDefaultInstance(),level,nextblock);
+        WorldInventoryInterface.safePlaceBlock(player, item ,level,nextblock);
 
     }
 
@@ -65,9 +53,24 @@ public class BuildWand extends AbstractWand {
         BlockPos p2 = controlPoints.get(1);
 
 
-        List<BlockPos> linepos = new Bresenhm3D().drawLine(p1,p2);
+        //List<BlockPos> linepos = new Bresenham3D().drawLine(p1,p2);
+
+        //List<BlockPos> linepos = new Line(p1,p2).getCoords();
+        //List<BlockPos> linepos = new UnoptomizedCatDraw().getblocks(p1,p2);
+        List<BlockPos> points = new ArrayList<>();
+        points.add(p1);
+        points.add(p2);
+
+        Vec3 v1 = helpers.blockPostoVec3(p1);
+        Vec3 v2 = helpers.blockPostoVec3(p2);
+
+        double r = v2.subtract(v1).length();
+        Vec3 v3 = v1.add(0,r,0);
+        //List<BlockPos> linepos = new UnoptomizedFunctionDraw().getblocks(new ParameterizedCircle(points),helpers.vec3toBlockPos(v3));
+        List<BlockPos> linepos = new ParameterizedCircle(points).getblocks(helpers.vec3toBlockPos(v3));
+
         helpers.putBlockList(nbt,"blockQueue", (ArrayList<BlockPos>) linepos);
-        LOGGER.info(String.valueOf(linepos));
+        //LOGGER.info(String.valueOf(linepos));
     }
 }
 

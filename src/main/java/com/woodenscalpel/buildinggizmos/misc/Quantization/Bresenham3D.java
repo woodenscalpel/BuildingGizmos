@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Bresenhm3D {
+public class Bresenham3D {
 
     public List<BlockPos> drawLine(BlockPos start, BlockPos end){
         List<BlockPos> line = plotLine3d(start.getX(),start.getY(),start.getZ(),end.getX(),end.getY(),end.getZ());

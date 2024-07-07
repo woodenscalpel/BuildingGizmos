@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,4 +80,12 @@ public class helpers {
         }
         return null;
     }
+
+    public static BlockPos vec3toBlockPos(Vec3 vec){
+       return new BlockPos(vec.x,vec.y,vec.z);
+    }
+    public static Vec3 blockPostoVec3(BlockPos pos){
+        return new Vec3(pos.getX(),pos.getY(),pos.getZ());
+    }
+
 }

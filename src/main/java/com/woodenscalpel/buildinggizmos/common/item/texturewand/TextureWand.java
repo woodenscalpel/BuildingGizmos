@@ -33,6 +33,9 @@ public class TextureWand  extends AbstractWand {
         ItemStack item = getRandomFromPallet(player,itemStack);
 
         //Checks if operation is valid and handle removing item from inventory, creative mode, etc #TODO abstract this into WorldInventoryInterface
+
+        WorldInventoryInterface.swapBlock(player,item,level,nextblock);
+        /*
         if (item != null && WorldInventoryInterface.canPlaceAt(level, nextblock) && (WorldInventoryInterface.hasItem(player, item) || player.isCreative())) {
 
             WorldInventoryInterface.destroyBlock(player,level,nextblock,true);
@@ -41,6 +44,8 @@ public class TextureWand  extends AbstractWand {
             }
             WorldInventoryInterface.placeBlock(player, item, level, nextblock);
         }
+
+         */
 
     }
 
