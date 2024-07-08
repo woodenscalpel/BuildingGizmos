@@ -2,9 +2,11 @@ package com.woodenscalpel.buildinggizmos.client;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.keys.KeyBinding;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildWand;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
 import com.woodenscalpel.buildinggizmos.networking.Messages;
+import com.woodenscalpel.buildinggizmos.networking.packet.BuildWandShapeChangePacket;
 import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandModeChangePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -29,7 +31,6 @@ public class ClientEvents {
                 if (item.getItem() instanceof AbstractWand) {
 
                     if (KeyBinding.MODE_SWITCH_KEY.consumeClick()) {
-                        //player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
                         ((AbstractWand) item.getItem()).switchMode(player);
                         Messages.sendToServer(new TextureWandModeChangePacket());
                     }
@@ -39,6 +40,12 @@ public class ClientEvents {
                         ((AbstractWand) item.getItem()).openPalletScreen();
                     }
 
+                }
+                if (item.getItem() instanceof BuildWand) {
+                    if (KeyBinding.SHAPE_SWITCH_KEY.consumeClick()) {
+                        ((BuildWand) item.getItem()).switchBuildMode(player);
+                        Messages.sendToServer(new BuildWandShapeChangePacket());
+                    }
                 }
             }
         }

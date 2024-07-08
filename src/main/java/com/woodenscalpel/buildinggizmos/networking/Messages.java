@@ -1,6 +1,7 @@
 package com.woodenscalpel.buildinggizmos.networking;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
+import com.woodenscalpel.buildinggizmos.networking.packet.BuildWandShapeChangePacket;
 import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandModeChangePacket;
 import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandPalletClosePacket;
 import net.minecraft.resources.ResourceLocation;
@@ -39,6 +40,11 @@ public class Messages {
                 .decoder(TextureWandPalletClosePacket::decode)
                 .encoder(TextureWandPalletClosePacket::toBytes)
                 .consumerMainThread(TextureWandPalletClosePacket::handle).add();
+
+        net.messageBuilder(BuildWandShapeChangePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(BuildWandShapeChangePacket::new)
+                .encoder(BuildWandShapeChangePacket::toBytes)
+                .consumerMainThread(BuildWandShapeChangePacket::handle).add();
     }
 
     public static <MSG> void sendToServer(MSG message){

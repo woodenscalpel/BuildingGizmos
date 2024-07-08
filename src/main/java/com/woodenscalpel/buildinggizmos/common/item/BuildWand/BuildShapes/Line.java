@@ -1,6 +1,7 @@
 package com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes;
 
 import com.mojang.logging.LogUtils;
+import com.woodenscalpel.buildinggizmos.misc.Quantization.Bresenham3D;
 import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedQuadBezier;
 import net.minecraft.core.BlockPos;
 import org.slf4j.Logger;
@@ -15,8 +16,10 @@ public class Line extends AbstractShape{
 
     public Line(BlockPos start, BlockPos end){
 
-       //coords = new Bresenham3D().drawLine(start,end);
+       coords = new Bresenham3D().drawLine(start,end);
 
+
+        /*
         List<BlockPos> points = new ArrayList<>();
         BlockPos midpoint = new BlockPos(start.getX()/2 + end.getX()/2,start.getY()/2 + end.getY()/2 + 10,start.getZ()/2 + end.getZ()/2);
         points.add(start);
@@ -25,7 +28,7 @@ public class Line extends AbstractShape{
 
         LOGGER.info(points.toString());
         coords = new ParameterizedQuadBezier(points).getblocks();
-
+         */
 
     }
 

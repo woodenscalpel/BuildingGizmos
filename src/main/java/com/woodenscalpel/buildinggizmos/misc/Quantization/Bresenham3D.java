@@ -1,6 +1,7 @@
 package com.woodenscalpel.buildinggizmos.misc.Quantization;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,22 @@ public class Bresenham3D {
             z1 -= dz; if (z1 < 0) { z1 += dm; z0 += sz; }
         }
         return  blockPosList;
+    }
+    public List<Tuple> plot2DCircle(int xm, int ym, int r)
+    //http://members.chello.at/~easyfilter/bresenham.html
+    {
+        List<Tuple> points = new ArrayList<>();
+        int x = -r, y = 0, err = 2-2*r;                /* bottom left to top right */
+        do {
+            points.add(new Tuple(xm-x, ym+y));                            /*   I. Quadrant +x +y */
+            points.add(new Tuple(xm-y, ym-x));                            /*  II. Quadrant -x +y */
+            points.add(new Tuple(xm+x, ym-y));                            /* III. Quadrant -x -y */
+            points.add(new Tuple(xm+y, ym+x));                            /*  IV. Quadrant +x -y */
+            r = err;
+            if (r <= y) err += ++y*2+1;                                   /* y step */
+            if (r > x || err > y) err += ++x*2+1;                         /* x step */
+        } while (x < 0);
+        return points;
     }
 
 

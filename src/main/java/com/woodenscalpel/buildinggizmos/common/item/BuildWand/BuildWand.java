@@ -2,12 +2,19 @@ package com.woodenscalpel.buildinggizmos.common.item.BuildWand;
 
 import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.Catenary;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.Circle;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.Line;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.ShapeModes;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.misc.InteractionLayer.WorldInventoryInterface;
 import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedCircle;
+import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -20,11 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 public class BuildWand extends AbstractWand {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     int TESTLINE = 0;
     int CURRENTSHAPE = 0;
+    ShapeModes currentShape = ShapeModes.LINE;
 
 
 
@@ -57,20 +66,41 @@ public class BuildWand extends AbstractWand {
 
         //List<BlockPos> linepos = new Line(p1,p2).getCoords();
         //List<BlockPos> linepos = new UnoptomizedCatDraw().getblocks(p1,p2);
+
+        ShapeModes shape = enumNbt.getshapeenum(nbt,"BUILDMODE");
+
         List<BlockPos> points = new ArrayList<>();
         points.add(p1);
         points.add(p2);
 
-        Vec3 v1 = helpers.blockPostoVec3(p1);
-        Vec3 v2 = helpers.blockPostoVec3(p2);
+        List<BlockPos> queue = new ArrayList<>();
 
-        double r = v2.subtract(v1).length();
-        Vec3 v3 = v1.add(0,r,0);
-        //List<BlockPos> linepos = new UnoptomizedFunctionDraw().getblocks(new ParameterizedCircle(points),helpers.vec3toBlockPos(v3));
-        List<BlockPos> linepos = new ParameterizedCircle(points).getblocks(helpers.vec3toBlockPos(v3));
+        switch(shape){
+            case LINE:
+                queue = new Line(p1,p2).getCoords();
+                break;
+            case CIRCLE:
+                queue = new Circle(p1,p2).getCoords();
+                break;
+            case CAT:
+                double defaultlength = helpers.blockPostoVec3(p2).subtract(helpers.blockPostoVec3(p1)).length()*1.1;
+                queue = new Catenary(p1,p2,defaultlength).getCoords();
+                break;
+        }
 
-        helpers.putBlockList(nbt,"blockQueue", (ArrayList<BlockPos>) linepos);
-        //LOGGER.info(String.valueOf(linepos));
+
+
+        helpers.putBlockList(nbt,"blockQueue", (ArrayList<BlockPos>) queue);
+    }
+
+    public void switchBuildMode(Player player) {
+        ItemStack item = player.getMainHandItem();
+        CompoundTag nbt = item.getOrCreateTag();
+        ShapeModes shape = enumNbt.getshapeenum(nbt,"BUILDMODE");
+        shape = shape.cycle();
+        enumNbt.setshapeenum(shape,nbt,"BUILDMODE");
+
+        player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
     }
 }
 
