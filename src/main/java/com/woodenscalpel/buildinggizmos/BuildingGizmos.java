@@ -35,7 +35,7 @@ public class BuildingGizmos
     // Define mod id in a common place for everything to reference
     public static final String MODID = "buildinggizmos";
     // Directly reference a slf4j logger
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
 
     public BuildingGizmos()

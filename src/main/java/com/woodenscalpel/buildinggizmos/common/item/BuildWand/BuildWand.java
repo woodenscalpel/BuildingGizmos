@@ -1,14 +1,14 @@
 package com.woodenscalpel.buildinggizmos.common.item.BuildWand;
 
 import com.mojang.logging.LogUtils;
+import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
-import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.Catenary;
-import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.Circle;
-import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.Line;
-import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.ShapeModes;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.*;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.misc.InteractionLayer.WorldInventoryInterface;
 import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedCircle;
+import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedCubicBezier;
+import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedQuadBezier;
 import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import net.minecraft.core.BlockPos;
@@ -49,7 +49,20 @@ public class BuildWand extends AbstractWand {
     @Override
     protected void processCoord(Player player, Level level, ItemStack wand, BlockPos nextblock) {
 
-        ItemStack item = getRandomFromPallet(player,wand);
+        //ItemStack item = getRandomFromPallet(player,wand);
+
+        int queuelen = wand.getOrCreateTag().getInt("queueLen");
+        int blocklen = (wand.getOrCreateTag().getIntArray("blockQueue").length+3)/3;
+
+        BuildingGizmos.LOGGER.info("LOG");
+        BuildingGizmos.LOGGER.info(String.valueOf(queuelen));
+        BuildingGizmos.LOGGER.info(String.valueOf(blocklen));
+
+        float percentage = (float) blocklen/queuelen;
+
+        BuildingGizmos.LOGGER.info(String.valueOf(percentage));
+
+        ItemStack item = getGradientFromPallet(player,wand,percentage);
 
         //WorldInventoryInterface.placeBlock(player, Blocks.STONE.asItem().getDefaultInstance(),level,nextblock);
         WorldInventoryInterface.safePlaceBlock(player, item ,level,nextblock);
@@ -81,14 +94,24 @@ public class BuildWand extends AbstractWand {
                 break;
             case CIRCLE:
                 queue = new Circle(p1,p2).getCoords();
+
                 break;
             case CAT:
                 double defaultlength = helpers.blockPostoVec3(p2).subtract(helpers.blockPostoVec3(p1)).length()*1.1;
                 queue = new Catenary(p1,p2,defaultlength).getCoords();
+
+                break;
+            case CUBICBEZIER:
+                queue = new ParameterizedCubicBezier(controlPoints).getblocks();
+                break;
+            case QUADBEZIER:
+                queue = new QuadBez(controlPoints).getCoords();
+                BuildingGizmos.LOGGER.info(queue.toString());
                 break;
         }
 
-
+        //Hack to determine gradient at runtime by storing total length of list and then can determine how far you are through the list by comparing current length of queue to original length
+        nbt.putInt("queueLen",queue.size());
 
         helpers.putBlockList(nbt,"blockQueue", (ArrayList<BlockPos>) queue);
     }
@@ -99,6 +122,24 @@ public class BuildWand extends AbstractWand {
         ShapeModes shape = enumNbt.getshapeenum(nbt,"BUILDMODE");
         shape = shape.cycle();
         enumNbt.setshapeenum(shape,nbt,"BUILDMODE");
+
+        switch(shape){
+            case LINE:
+                setNumControlPoints(nbt,2);
+                break;
+            case CIRCLE:
+                setNumControlPoints(nbt,2);
+                break;
+            case CAT:
+                setNumControlPoints(nbt,2);
+                break;
+            case CUBICBEZIER:
+                setNumControlPoints(nbt,4);
+                break;
+            case QUADBEZIER:
+                setNumControlPoints(nbt,3);
+                break;
+        }
 
         player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
     }

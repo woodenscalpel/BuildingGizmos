@@ -24,7 +24,7 @@ public class helpers {
         return new BlockPos(arr[0],arr[1],arr[2]);
     }
 
-    public static void putBlockList(CompoundTag tag, String tagname, ArrayList<BlockPos> poslist){
+    public static void putBlockList(CompoundTag tag, String tagname, List<BlockPos> poslist){
         int lenBlocks = poslist.size();
         int lenCoords = lenBlocks*3;
 
@@ -51,6 +51,15 @@ public class helpers {
 
         tag.putIntArray(tagname,posintarray);
 
+    }
+
+    public static List<BlockPos> getBlockList(CompoundTag tag, String tagname){
+        int[] rawblocks = tag.getIntArray(tagname);
+        List<BlockPos> blocks = new ArrayList<>();
+        for(int i = 0; i< rawblocks.length; i = i+3){
+            blocks.add(new BlockPos(rawblocks[i],rawblocks[i+1],rawblocks[i+2]));
+        }
+        return blocks;
     }
 
     public static int[] arraySlice(int[] arr, int start, int end) {

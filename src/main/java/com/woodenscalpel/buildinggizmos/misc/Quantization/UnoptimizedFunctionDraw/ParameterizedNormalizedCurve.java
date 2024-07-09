@@ -1,5 +1,6 @@
 package com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw;
 
+import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,7 +26,9 @@ public abstract class ParameterizedNormalizedCurve {
 
             Vec3 point = this.f(t);
             BlockPos closestBlock = closest(point, current);
-            if(closestBlock != current){
+            BuildingGizmos.LOGGER.info(point.toString());
+            BuildingGizmos.LOGGER.info(current.toString());
+           if(closestBlock != current){
                 result.add(closestBlock);
                 current = closestBlock;
             }
@@ -43,7 +46,7 @@ public abstract class ParameterizedNormalizedCurve {
         double closestdistance = point.distanceTo(new Vec3(current.getX(),current.getY(),current.getZ()));
         BlockPos closestblock = current;
         for(int x = current.getX()-1; x<= current.getX()+1;x++){
-            for(int y = current.getZ()-1; y<= current.getY()+1;y++){
+            for(int y = current.getY()-1; y<= current.getY()+1;y++){
                 for(int z = current.getZ()-1; z<= current.getZ()+1;z++){
                     double distance = point.distanceTo(new Vec3(x,y,z));
                     if(distance < closestdistance){

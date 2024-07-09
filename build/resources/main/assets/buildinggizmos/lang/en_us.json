@@ -1,0 +1,8 @@
+{
+  "item.buildinggizmos.testitem": "TEST ITEM",
+  "itemGroup.buildinggizmostab": "Building Gizmos",
+
+  "key.category.buildinggizmos.buildinggizmos": "Building Gizmos",
+  "key.buildinggizmos.mode_switch": "Switch Placement Mode",
+  "key.buildinggizmos.pallet_menu":"Open BlockPallet Menu"
+}

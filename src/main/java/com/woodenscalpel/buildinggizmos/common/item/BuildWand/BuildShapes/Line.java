@@ -18,7 +18,6 @@ public class Line extends AbstractShape{
 
        coords = new Bresenham3D().drawLine(start,end);
 
-
         /*
         List<BlockPos> points = new ArrayList<>();
         BlockPos midpoint = new BlockPos(start.getX()/2 + end.getX()/2,start.getY()/2 + end.getY()/2 + 10,start.getZ()/2 + end.getZ()/2);
@@ -26,7 +25,6 @@ public class Line extends AbstractShape{
         points.add(midpoint);
         points.add(end);
 
-        LOGGER.info(points.toString());
         coords = new ParameterizedQuadBezier(points).getblocks();
          */
 

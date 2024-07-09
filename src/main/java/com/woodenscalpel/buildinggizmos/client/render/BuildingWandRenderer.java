@@ -42,6 +42,9 @@ public class BuildingWandRenderer {
         assert Minecraft.getInstance().player != null;
         ItemStack item = Minecraft.getInstance().player.getMainHandItem();
         if (item.getItem() instanceof BuildWand && item.getOrCreateTag().getBoolean("ready")) {
+
+            int[] blockQueue = item.getOrCreateTag().getIntArray("blockQueue");
+        /*
                 int[] b1 = item.getOrCreateTag().getIntArray("P1");
                 int[] b2 = item.getOrCreateTag().getIntArray("P2");
                 int[] blockQueue = item.getOrCreateTag().getIntArray("blockQueue");
@@ -65,6 +68,7 @@ public class BuildingWandRenderer {
                     }
                 }
 
+         */
                 if (blockQueue.length > 0){
                     if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
                         Vec3 campos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
@@ -83,6 +87,7 @@ public class BuildingWandRenderer {
             }
 
     }
+
 
     public static void drawLineBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
         RenderSystem.disableDepthTest();

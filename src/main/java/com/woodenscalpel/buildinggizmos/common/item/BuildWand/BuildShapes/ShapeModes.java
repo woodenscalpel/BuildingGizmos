@@ -1,7 +1,7 @@
 package com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes;
 
 public enum ShapeModes {
-    LINE,CIRCLE,CAT;
+    LINE,CIRCLE,CAT,CUBICBEZIER,QUADBEZIER;
 
     public ShapeModes cycle(){
         int length = values().length;

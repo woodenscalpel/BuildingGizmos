@@ -1,5 +1,6 @@
 package com.woodenscalpel.buildinggizmos.common.item.abstractwand;
 
+import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
@@ -28,9 +29,8 @@ import java.util.Objects;
 public abstract class AbstractWand extends Item implements PaletteInterface{
 
     //State machine states
-    static final int SELECTING_P1 = 0;
-    static final int SELECTING_P2 = 1;
-    static final int IN_USE = 2;
+    static final int SELECTING = 0;
+    static final int IN_USE = 1;
 
     //Palette modes
     static final int MODE_HOTBAR = 0;
@@ -57,16 +57,14 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
             if (!Objects.requireNonNull(context.getPlayer()).isCrouching()) {
                 if (nbt.getBoolean("ready")) {
+                    BuildingGizmos.LOGGER.info("SWAPPIGN");
 
 
                     //if(context.getItemInHand().getOrCreateTag().getInt("ready") == 1){
+                    List<BlockPos> controlpoints = getControlPoints(nbt);
 
-                    BlockPos b1 = helpers.intarray2blockpos(nbt.getIntArray("P1"));
-                    BlockPos b2 = helpers.intarray2blockpos(nbt.getIntArray("P2"));
-
-                    List<BlockPos> controlPoints = new ArrayList<>();
-                    controlPoints.add(b1);
-                    controlPoints.add(b2);
+                    BlockPos b1 = controlpoints.get(0);
+                    BlockPos b2 = controlpoints.get(1);
 
                     Box area = new Box(b1,b2);
 
@@ -86,33 +84,36 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                 switch (nbt.getInt("state")) {
                     case IN_USE:
                         break;
-                    case SELECTING_P1:
+                    case SELECTING:
                         BlockPos p1 = context.getClickedPos();
-                        nbt.putIntArray("P1", helpers.BlockPostoIntArray(p1));
-                        nbt.putInt("state", SELECTING_P2);
-                        nbt.putBoolean("ready", false);
+                        //BuildingGizmos.LOGGER.info("SELECT" + p1.toString());
 
-                        //LOGGER.info("set P1");
+                        int maxpoints = getNumControlPoints(nbt);
+                       // BuildingGizmos.LOGGER.info("max" + maxpoints);
+                        List<BlockPos> currentpoints = getControlPoints(nbt);
+                        //BuildingGizmos.LOGGER.info("currentlist" + currentpoints.toString());
+                        int numpoints = currentpoints.size();
+                       // BuildingGizmos.LOGGER.info("num" + numpoints);
 
-
-                        break;
-                    case SELECTING_P2:
-                        BlockPos p2 = context.getClickedPos();
-                        nbt.putIntArray("P2", helpers.BlockPostoIntArray(p2));
-                        nbt.putInt("state", SELECTING_P1);
-                        nbt.putBoolean("ready", true);
-
-                        BlockPos b1 = helpers.intarray2blockpos(nbt.getIntArray("P1"));
-                        BlockPos b2 = helpers.intarray2blockpos(nbt.getIntArray("P2"));
-
-                        List<BlockPos> controlPoints = new ArrayList<>();
-                        controlPoints.add(b1);
-                        controlPoints.add(b2);
-
-                        setBlockQueue(controlPoints,nbt);
-                        //nbt.putIntArray("blockQueue",helpers.arraySlice(rawBlockQueue,3,rawBlockQueue.length));
-                        //LOGGER.info("set P2");
-
+                        if(numpoints + 1 < maxpoints){
+                            currentpoints.add(p1);
+                            setControlPoints(nbt,currentpoints);
+                        }
+                       else if(numpoints+1 == maxpoints) {
+                            currentpoints.add(p1);
+                            setControlPoints(nbt,currentpoints);
+                             //   BuildingGizmos.LOGGER.info("ready!");
+                                setBlockQueue(currentpoints,nbt);
+                                nbt.putBoolean("ready", true);
+                            }
+                        else{ // CLEAR CONTROL POINTS AND SET THIS ONE AS FIRST ONE
+                            nbt.putBoolean("ready", false);
+                            List<BlockPos> newlist = new ArrayList<>();
+                            newlist.add(p1);
+                            setControlPoints(nbt,newlist);
+                        }
+                      //  BuildingGizmos.LOGGER.info(String.valueOf(numpoints));
+                      //  BuildingGizmos.LOGGER.info(String.valueOf(maxpoints));
                         break;
                     default:
                         throw new IllegalStateException("Unexpected value:");
@@ -136,7 +137,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
                 if(rawBlockQueue.length < 3) {
 
-                    nbt.putInt("state", SELECTING_P1);
+                    nbt.putInt("state", SELECTING);
                 }
 
             if (nbt.getInt("state") == IN_USE) {
@@ -215,6 +216,38 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
         List<ItemStack> palette = getPaletteFromMode(player,itemStack,MODE);
         return RandomItemStack(palette);
+    }
+
+    protected ItemStack getGradientFromPallet(Player player, ItemStack itemStack,double percent){
+        CompoundTag nbt = itemStack.getOrCreateTag();
+        int MODE = nbt.getInt("MODE");
+        //LOGGER.info(String.valueOf(MODE));
+        //LOGGER.info(Arrays.toString(nbt.getIntArray("palletIDs")));
+
+        List<ItemStack> palette = getPaletteFromMode(player,itemStack,MODE);
+        BuildingGizmos.LOGGER.info("WTF");
+        BuildingGizmos.LOGGER.info(String.valueOf(palette.size()));
+        BuildingGizmos.LOGGER.info(String.valueOf((palette.size()-1)));
+        BuildingGizmos.LOGGER.info(String.valueOf(Math.floor(((palette.size()-1))*percent)));
+        return palette.get((int) Math.floor((palette.size()-1)*percent));
+    }
+
+
+
+    public int getNumControlPoints(CompoundTag nbt){
+        int controlpoints = nbt.getInt("NCONTROLPOINTS");
+        if (controlpoints == 0){ controlpoints = 2;} //default of 2
+        return controlpoints;
+    }
+    public void setNumControlPoints(CompoundTag nbt,int n){
+       nbt.putInt("NCONTROLPOINTS",n);
+    }
+    public List<BlockPos> getControlPoints(CompoundTag nbt){
+        return helpers.getBlockList(nbt,"CONTROLPOINTS");
+    }
+
+    public void setControlPoints(CompoundTag nbt, List<BlockPos> cp) {
+        helpers.putBlockList(nbt,"CONTROLPOINTS",cp);
     }
 
     protected abstract void processCoord(Player player, Level level, ItemStack itemStack, BlockPos nextblock);
