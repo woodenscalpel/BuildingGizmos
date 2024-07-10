@@ -3,6 +3,7 @@ package com.woodenscalpel.buildinggizmos.misc.shapes;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -63,5 +64,11 @@ public class Box {
 
     public AABB renderBox(){
         return new AABB(minx,miny,minz,maxx+1,maxy+1,maxz+1);
+    }
+
+    public boolean contains(Vec3 r) {
+
+
+        return((minx <= r.x && r.x <= maxx+1)&& (miny <= r.y && r.y <= maxy+1) &&( minz <= r.z && r.z <= maxz+1));
     }
 }

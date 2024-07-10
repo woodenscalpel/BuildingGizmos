@@ -7,6 +7,8 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -61,6 +63,36 @@ public class helpers {
         }
         return blocks;
     }
+
+    //Save a list of doubles as ints by scaling and truncating...... TODO learn how to use ListTags
+    static final int badscale = 10000;
+    public static void putVecList(CompoundTag tag, String tagname, List<Vec3> poslist){
+        int lenBlocks = poslist.size();
+        int lenCoords = lenBlocks*3;
+
+        int[] posintarray = new int[lenCoords];
+        int i = 0;
+
+        for(int block =0; block<lenBlocks; block++){
+                        posintarray[i] = (int) (poslist.get(block).x*badscale);
+                        posintarray[i] = (int) (poslist.get(block).y*badscale);
+                        posintarray[i] = (int) (poslist.get(block).z*badscale);
+
+        }
+
+        tag.putIntArray(tagname,posintarray);
+
+    }
+
+    public static List<Vec3> getVecList(CompoundTag tag, String tagname){
+        int[] rawblocks = tag.getIntArray(tagname);
+        List<Vec3> blocks = new ArrayList<>();
+        for(int i = 0; i< rawblocks.length; i = i+3){
+            blocks.add(new Vec3((double) rawblocks[i] /badscale, (double) rawblocks[i + 1] /badscale, (double) rawblocks[i + 2] /badscale));
+        }
+        return blocks;
+    }
+
 
     public static int[] arraySlice(int[] arr, int start, int end) {
         // Get the slice of the Array

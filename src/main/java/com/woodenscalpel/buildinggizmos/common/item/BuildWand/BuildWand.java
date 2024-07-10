@@ -5,22 +5,31 @@ import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.*;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.ControlPoint;
 import com.woodenscalpel.buildinggizmos.misc.InteractionLayer.WorldInventoryInterface;
 import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedCircle;
 import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedCubicBezier;
 import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw.ParameterizedQuadBezier;
+import com.woodenscalpel.buildinggizmos.misc.Raycast;
 import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
+import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Column;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -41,14 +50,17 @@ public class BuildWand extends AbstractWand {
         super(properties.stacksTo(1));
     }
 
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+        ControlPoint testbox = new ControlPoint(new Vec3(0,100,0));
 
-    public void openPalletScreen(){
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT,() -> ClientHooks::openTextureWandScreen);
+        testbox.handleRaycast(new Raycast());
+
+        return super.use(pLevel, pPlayer, pUsedHand);
     }
 
     @Override
     protected void processCoord(Player player, Level level, ItemStack wand, BlockPos nextblock) {
-
         //ItemStack item = getRandomFromPallet(player,wand);
 
         int queuelen = wand.getOrCreateTag().getInt("queueLen");

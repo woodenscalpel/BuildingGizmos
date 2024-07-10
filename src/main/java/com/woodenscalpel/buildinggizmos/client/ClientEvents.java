@@ -2,9 +2,10 @@ package com.woodenscalpel.buildinggizmos.client;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.keys.KeyBinding;
+import com.woodenscalpel.buildinggizmos.client.render.entity.TestEntityRenderer;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildWand;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
-import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
+import com.woodenscalpel.buildinggizmos.init.EntityInit;
 import com.woodenscalpel.buildinggizmos.networking.Messages;
 import com.woodenscalpel.buildinggizmos.networking.packet.BuildWandShapeChangePacket;
 import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandModeChangePacket;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -57,6 +59,11 @@ public class ClientEvents {
         public static void onKeyRegister(RegisterKeyMappingsEvent event){
             event.register(KeyBinding.MODE_SWITCH_KEY);
             event.register(KeyBinding.PALLET_MENU_KEY);
+        }
+
+        @SubscribeEvent
+        public static void entityRenderers(EntityRenderersEvent.RegisterRenderers event){
+            event.registerEntityRenderer(EntityInit.TEST.get(), TestEntityRenderer::new);
         }
     }
 }

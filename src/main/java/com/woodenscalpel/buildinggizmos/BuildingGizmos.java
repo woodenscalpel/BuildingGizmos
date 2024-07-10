@@ -3,6 +3,7 @@ package com.woodenscalpel.buildinggizmos;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.common.item.ModItems;
+import com.woodenscalpel.buildinggizmos.init.EntityInit;
 import com.woodenscalpel.buildinggizmos.misc.getTextures;
 import com.woodenscalpel.buildinggizmos.networking.Messages;
 import net.minecraft.client.Minecraft;
@@ -42,7 +43,12 @@ public class BuildingGizmos
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
+        //Resister items
         ModItems.register(modEventBus);
+        //Register entities
+        //EntityInit.ENTITIES.register(modEventBus);
+        EntityInit.register(modEventBus);
+
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
@@ -52,6 +58,8 @@ public class BuildingGizmos
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -78,7 +86,7 @@ public class BuildingGizmos
     public void onServerStarting(ServerStartingEvent event)
     {
         // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+        //LOGGER.info("HELLO from server starting");
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
@@ -89,8 +97,8 @@ public class BuildingGizmos
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             // Some client setup code
-            LOGGER.info("HELLO FROM CLIENT SETUP");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+            //LOGGER.info("HELLO FROM CLIENT SETUP");
+            //LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
 }
