@@ -1,5 +1,6 @@
 package com.woodenscalpel.buildinggizmos.common.item.abstractwand;
 
+import com.mojang.math.Vector3f;
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.ShapeModes;
@@ -7,6 +8,7 @@ import com.woodenscalpel.buildinggizmos.misc.Raycast;
 import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -23,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -69,6 +72,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
             List<Vec3> controlPoints = AbstractWand.ShapeHelper.getControlPoints(nbt);
             List<ControlPoint> controlPointHitboxes = new ArrayList<>();
 
+            /*
             Raycast rc = new Raycast();
             List<Vec3> nudgedControlPoints = new ArrayList<>();
             for (Vec3 cp : controlPoints) {
@@ -77,28 +81,108 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                 nudgedControlPoints.add(nudgedcp);
             }
             ShapeHelper.redrawShapeAndQueue(nbt, nudgedControlPoints);
+             */
+            Raycast rc = new Raycast();
+            int cpidx = 0;
+            List<Double> result;
+            for (Vec3 cp : controlPoints) {
+                ControlPoint tempcp = new ControlPoint(cp,cpidx);
+                result = tempcp.getIdAxisGrabbedPoint(rc);
+                int axis = (int) Math.round(result.get(1));
+                nbt.putInt("axis",axis);
+                nbt.putInt("cpidx",cpidx);
+                nbt.putDouble("grabx",result.get(2));
+                nbt.putDouble("graby",result.get(3));
+                nbt.putDouble("grabz",result.get(4));
+                if(axis != -1) {
+                    return ItemUtils.startUsingInstantly(pLevel, pPlayer, pUsedHand);
+                }
+                cpidx++;
+
+            }
         }
 
 
 
 
-        pPlayer.startUsingItem(pUsedHand);
+
+        //pPlayer.startUsingItem(pUsedHand);
         // return InteractionResultHolder.consume(item);
-        return ItemUtils.startUsingInstantly(pLevel,pPlayer,pUsedHand);
+        //return ItemUtils.startUsingInstantly(pLevel,pPlayer,pUsedHand);
         //BuildingGizmos.LOGGER.info("USE");
-        //return super.use(pLevel, pPlayer, pUsedHand);
+        return super.use(pLevel, pPlayer, pUsedHand);
     }
 
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        BuildingGizmos.LOGGER.info("USING");
-        super.onUsingTick(stack, player, count);
-    }
+        CompoundTag nbt = stack.getOrCreateTag();
+        int tickmod = nbt.getInt("tickmod");
+        int axis = nbt.getInt("axis");
+        int cpidx = nbt.getInt("cpidx");
+        double grabx = nbt.getDouble("grabx");
+        double graby = nbt.getDouble("graby");
+        double grabz = nbt.getDouble("grabz");
+        Vec3 grabvec = new Vec3(grabx,graby,grabz);
+        BuildingGizmos.LOGGER.info(String.valueOf(axis));
 
-    @Override
-    public void onUseTick(Level pLevel, LivingEntity pLivingEntity, ItemStack pStack, int pRemainingUseDuration) {
-        BuildingGizmos.LOGGER.info("USING2");
-        super.onUseTick(pLevel, pLivingEntity, pStack, pRemainingUseDuration);
+        Vec3 campos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
+        Vector3f look = Minecraft.getInstance().getEntityRenderDispatcher().camera.getLookVector();
+        Vec3 diffpos = grabvec.subtract(campos);
+        //test with Y axis
+
+        List<Vec3> controlPoints = AbstractWand.ShapeHelper.getControlPoints(nbt);
+        List<Vec3> nudgedControlPoints = new ArrayList<>();
+        if(axis ==0){
+            double radius = Math.sqrt(diffpos.y*diffpos.y + diffpos.z*diffpos.z);
+            double newx = campos.x+look.x()*radius;
+
+            int cpidx1 = 0;
+            for(Vec3 cp : controlPoints){
+                if(cpidx1 == cpidx){
+                    nudgedControlPoints.add(new Vec3(newx,cp.y,cp.z));
+                }else{
+                    nudgedControlPoints.add(cp);
+                }
+                cpidx1++;
+            }
+        }
+        if(axis ==1){
+           double radius = Math.sqrt(diffpos.x*diffpos.x + diffpos.z*diffpos.z);
+           double newy = campos.y+look.y()*radius;
+
+            int cpidx1 = 0;
+            for(Vec3 cp : controlPoints){
+                if(cpidx1 == cpidx){
+                    nudgedControlPoints.add(new Vec3(cp.x,newy,cp.z));
+                }else{
+                    nudgedControlPoints.add(cp);
+                }
+                cpidx1++;
+            }
+        }
+        if(axis ==2){
+            double radius = Math.sqrt(diffpos.x*diffpos.x + diffpos.y*diffpos.y);
+            double newz = campos.z+look.z()*radius;
+
+            int cpidx1 = 0;
+            for(Vec3 cp : controlPoints){
+                if(cpidx1 == cpidx){
+                    nudgedControlPoints.add(new Vec3(cp.x,cp.y,newz));
+                }else{
+                    nudgedControlPoints.add(cp);
+                }
+                cpidx1++;
+            }
+        }
+        if(tickmod % 10 == 0) {
+            ShapeHelper.redrawShapeAndQueue(nbt, nudgedControlPoints);
+        }
+        else{
+            ShapeHelper.setControlPoints(nbt,nudgedControlPoints);
+        }
+        nbt.putInt("tickmod",(tickmod+1)%10);
+
+        super.onUsingTick(stack, player, count);
     }
 
 
@@ -252,6 +336,9 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
         //LOGGER.info(Arrays.toString(nbt.getIntArray("palletIDs")));
 
         List<ItemStack> palette = getPaletteFromMode(player,itemStack,MODE);
+        if(palette.isEmpty()){
+            return Blocks.STONE.asItem().getDefaultInstance(); //TODO fix this
+        }
         /*
         BuildingGizmos.LOGGER.info("WTF");
         BuildingGizmos.LOGGER.info(String.valueOf(palette.size()));

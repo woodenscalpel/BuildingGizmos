@@ -80,7 +80,7 @@ public class GizmoWorldRenderer {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) { //TODO want to change this to later stage but strange viewbob desync happens
                 //CONTROL POINTS*******************************************************************************
                 for(Vec3 cp : cplist){
-                    ControlPoint controlPoint = new ControlPoint(cp);
+                    ControlPoint controlPoint = new ControlPoint(cp,-1);
                     for(Vec3Box box: controlPoint.getBoxes()){
                         //BuildingGizmos.LOGGER.info(String.valueOf(box.minx) + " "+String.valueOf(box.maxx));
                         box.move(-px,-py,-pz);
