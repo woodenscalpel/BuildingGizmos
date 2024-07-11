@@ -49,13 +49,5 @@ public class TextureWand  extends AbstractWand {
 
     }
 
-    @Override
-    protected void setBlockQueue(List<BlockPos> controlPoints, CompoundTag nbt){
-
-        Box area = new Box(controlPoints.get(0),controlPoints.get(1));
-        helpers.putBlockList(nbt,"blockQueue",area.getBlockList());
-
-    }
-
 }
 

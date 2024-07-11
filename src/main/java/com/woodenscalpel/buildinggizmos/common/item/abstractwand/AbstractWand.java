@@ -2,6 +2,8 @@ package com.woodenscalpel.buildinggizmos.common.item.abstractwand;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.ShapeModes;
+import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
 import net.minecraft.core.BlockPos;
@@ -17,6 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.NotNull;
@@ -56,15 +59,15 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
 
             if (!Objects.requireNonNull(context.getPlayer()).isCrouching()) {
-                if (nbt.getBoolean("ready")) {
+                if (ShapeHelper.getShapeComplete(nbt)) {
                     BuildingGizmos.LOGGER.info("SWAPPIGN");
 
 
                     //if(context.getItemInHand().getOrCreateTag().getInt("ready") == 1){
-                    List<BlockPos> controlpoints = getControlPoints(nbt);
+                    List<BlockPos> ConstPoints = ShapeHelper.getConstructorPoints(nbt);
 
-                    BlockPos b1 = controlpoints.get(0);
-                    BlockPos b2 = controlpoints.get(1);
+                    BlockPos b1 = ConstPoints.get(0);
+                    BlockPos b2 = ConstPoints.get(1);
 
                     Box area = new Box(b1,b2);
 
@@ -87,36 +90,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                     case SELECTING:
                         BlockPos p1 = context.getClickedPos();
                         //BuildingGizmos.LOGGER.info("SELECT" + p1.toString());
-
-                        int maxpoints = getNumControlPoints(nbt);
-                       // BuildingGizmos.LOGGER.info("max" + maxpoints);
-                        List<BlockPos> currentpoints = getControlPoints(nbt);
-                        //BuildingGizmos.LOGGER.info("currentlist" + currentpoints.toString());
-                        int numpoints = currentpoints.size();
-                       // BuildingGizmos.LOGGER.info("num" + numpoints);
-
-                        if(numpoints + 1 < maxpoints){
-                            currentpoints.add(p1);
-                            setControlPoints(nbt,currentpoints);
-                        }
-                       else if(numpoints+1 == maxpoints) {
-                            currentpoints.add(p1);
-                            setControlPoints(nbt,currentpoints);
-                             //   BuildingGizmos.LOGGER.info("ready!");
-                                setBlockQueue(currentpoints,nbt);
-                                nbt.putBoolean("ready", true);
-                            }
-                        else{ // CLEAR CONTROL POINTS AND SET THIS ONE AS FIRST ONE
-                            nbt.putBoolean("ready", false);
-                            List<BlockPos> newlist = new ArrayList<>();
-                            newlist.add(p1);
-                            setControlPoints(nbt,newlist);
-                        }
-                      //  BuildingGizmos.LOGGER.info(String.valueOf(numpoints));
-                      //  BuildingGizmos.LOGGER.info(String.valueOf(maxpoints));
-                        break;
-                    default:
-                        throw new IllegalStateException("Unexpected value:");
+                        ShapeHelper.addConstructorPoint(nbt,p1);
                 }
 
             }
@@ -133,17 +107,17 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
             if (nbt.getInt("state") == IN_USE) {
 
                 //LOGGER.info("USING!");
-                int[] rawBlockQueue = nbt.getIntArray("blockQueue");
+                List<BlockPos> blockQueue = ShapeHelper.getQueue(nbt);
 
-                if(rawBlockQueue.length < 3) {
-
+                if(blockQueue.isEmpty()) {
                     nbt.putInt("state", SELECTING);
                 }
 
             if (nbt.getInt("state") == IN_USE) {
 
-                BlockPos nextblock = new BlockPos(rawBlockQueue[0],rawBlockQueue[1],rawBlockQueue[2]);
-                nbt.putIntArray("blockQueue",helpers.arraySlice(rawBlockQueue,3,rawBlockQueue.length));
+                BlockPos nextblock = blockQueue.get(0);
+                blockQueue.remove(0);
+                ShapeHelper.setBuildQueue(nbt,blockQueue);
 
                 if(entity instanceof Player player) {
                     processCoord(player,level,itemStack,nextblock);
@@ -252,6 +226,104 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
     protected abstract void processCoord(Player player, Level level, ItemStack itemStack, BlockPos nextblock);
 
-    protected abstract void setBlockQueue(List<BlockPos> controlPoints, CompoundTag nbt);
+
+    public static class ShapeHelper {
+        static String NpointsTag = "NCONTROLPOINTS";
+
+        static String ConstructorPointsTag = "CONSTRUCTORPOINTS";
+        static String ControlPointsTag = "CONTROLPOINTS";
+
+        static String ShapeCompleteTag = "READY";
+        static String PaletteModeTag = "PALETTEMODE";
+        static String ShapeTag = "SHAPE";
+
+        static String BuildQueueTag = "BUILDQUEUE";
+
+
+        public static void SetShapeComplete(CompoundTag nbt, boolean ready){
+            nbt.putBoolean(ShapeCompleteTag,ready);
+        }
+
+        public static boolean getShapeComplete(CompoundTag nbt){
+            return nbt.getBoolean(ShapeCompleteTag);
+        }
+
+        public static void setBuildQueue(CompoundTag nbt,List<BlockPos> blocks){
+            helpers.putBlockList(nbt,BuildQueueTag,blocks);
+        }
+
+        public static List<BlockPos> getQueue(CompoundTag nbt) {
+            return helpers.getBlockList(nbt,BuildQueueTag);
+        }
+
+        public static List<BlockPos> getConstructorPoints(CompoundTag nbt) {
+            return helpers.getBlockList(nbt, ConstructorPointsTag);
+        }
+
+        public static void setConstructorPoints(CompoundTag nbt, List<BlockPos> cp) {
+            helpers.putBlockList(nbt, ConstructorPointsTag, cp);
+        }
+
+        public static List<Vec3> getControlPoints(CompoundTag nbt) {
+            return helpers.getVecList(nbt, ControlPointsTag);
+        }
+
+        public static void setControlPoints(CompoundTag nbt, List<Vec3> cp) {
+            helpers.putVecList(nbt, ControlPointsTag, cp);
+        }
+
+
+        public static ShapeModes getShape(CompoundTag nbt) {
+            return enumNbt.getshapeenum(nbt, ShapeTag);
+        }
+        public static void setShape(CompoundTag nbt,ShapeModes s) {
+            enumNbt.setshapeenum(s,nbt, ShapeTag);
+        }
+
+        public static void cycleShape(CompoundTag nbt) {
+            setShape(nbt, getShape(nbt).cycle());
+        }
+
+
+        public static void addConstructorPoint(CompoundTag nbt, BlockPos p1) {
+            List<BlockPos> constPoints = getConstructorPoints(nbt);
+            ShapeModes shape = getShape(nbt);
+            int MaxN = shape.NCONSTPOINTS();
+            int numpoints = constPoints.size();
+            // BuildingGizmos.LOGGER.info("num" + numpoints);
+
+            if (numpoints + 1 < MaxN) {
+                constPoints.add(p1);
+                setConstructorPoints(nbt, constPoints);
+            } else if (numpoints + 1 == MaxN) {
+                //Shape Is Ready!
+                constPoints.add(p1);
+                setConstructorPoints(nbt, constPoints);
+                List<Vec3> cp = shape.getControlPointsFromConstructorPoints(constPoints);
+                BuildingGizmos.LOGGER.info(String.valueOf(cp));
+                setControlPoints(nbt,cp);
+                ConstructShapeAndSetQueue(nbt);
+                SetShapeComplete(nbt,true);
+                BuildingGizmos.LOGGER.info(String.valueOf(getShapeComplete(nbt)));
+            } else { // CLEAR CONTROL POINTS AND SET THIS ONE AS FIRST ONE
+                SetShapeComplete(nbt,false);
+                List<BlockPos> newlist = new ArrayList<>();
+                newlist.add(p1);
+                setConstructorPoints(nbt, newlist);
+            }
+        }
+        public static void ConstructShapeAndSetQueue(CompoundTag nbt){
+            List<Vec3> cp = getControlPoints(nbt);
+            BuildingGizmos.LOGGER.info(String.valueOf(cp));
+            ShapeModes shape = getShape(nbt);
+            List<BlockPos> blocks = shape.getShapeFromControlPoints(cp);
+            BuildingGizmos.LOGGER.info(String.valueOf(blocks));
+            nbt.putInt("queueLen",blocks.size()); //TODO hack for gradient
+            setBuildQueue(nbt,blocks);
+
+
+        }
+
+    }
 }
 

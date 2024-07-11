@@ -100,7 +100,13 @@ public class CatHelper {
 
 
 
-    public List<Vec3> getCatPoints(double x1, double y1, double z1, double x2, double y2, double z2, double s){
+    public List<Vec3> getCatPoints(Vec3 p1, Vec3 _p2, double s){
+        double x1 = p1.x;
+        double y1 = p1.y;
+        double z1 = p1.z;
+        double x2 = _p2.x;
+        double y2 = _p2.y;
+        double z2 = _p2.z;
         //Translate P2 in referance to P1
         double x2t = x2 - x1;
         double y2t = y2 - y1;

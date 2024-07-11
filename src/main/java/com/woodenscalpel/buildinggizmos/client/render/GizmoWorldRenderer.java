@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -33,11 +34,10 @@ public class GizmoWorldRenderer {
 // public static void onWorldRenderLast(RenderLevelStageEvent event){
         assert Minecraft.getInstance().player != null;
         ItemStack item = Minecraft.getInstance().player.getMainHandItem();
-        if (item.getItem() instanceof AbstractWand && item.getOrCreateTag().getBoolean("ready")) {
-            List<BlockPos> cplist = helpers.getBlockList(item.getOrCreateTag(),"CONTROLPOINTS");
+        CompoundTag nbt = item.getOrCreateTag();
+        if (item.getItem() instanceof AbstractWand && AbstractWand.ShapeHelper.getShapeComplete(nbt)) {
+            List<Vec3> cplist = AbstractWand.ShapeHelper.getControlPoints(nbt);
 //            BuildingGizmos.LOGGER.info("CRASHLIST" + cplist.toString());
-            int[] b1 = new int[] {cplist.get(0).getX(),cplist.get(0).getY(),cplist.get(0).getZ()};
-            int[] b2 = new int[] {cplist.get(1).getX(),cplist.get(1).getY(),cplist.get(1).getZ()};
                     //if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
                     if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
                         //if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS) {
@@ -49,7 +49,7 @@ public class GizmoWorldRenderer {
                         double px = campos.x();
                         double py = campos.y();
                         double pz = campos.z();
-                        AABB shape3 = new Box(b1, b2).renderBox().move(-px, -py, -pz);
+                        AABB shape3 = new Box(cplist.get(0),cplist.get(1)).renderBox().move(-px, -py, -pz);
                         //AABB shape = Shapes.block().bounds().move(0, -10, 0);
                         drawLineBox(event.getPoseStack(), shape3, 1.0f, 0.3f, 1.0f, 1.0f);
                     }

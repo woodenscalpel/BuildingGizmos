@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildWand;
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -32,6 +34,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.slf4j.Logger;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber(modid = BuildingGizmos.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class BuildingWandRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -41,9 +45,10 @@ public class BuildingWandRenderer {
 // public static void onWorldRenderLast(RenderLevelStageEvent event){
         assert Minecraft.getInstance().player != null;
         ItemStack item = Minecraft.getInstance().player.getMainHandItem();
-        if (item.getItem() instanceof BuildWand && item.getOrCreateTag().getBoolean("ready")) {
+        CompoundTag nbt = item.getOrCreateTag();
+        if (item.getItem() instanceof BuildWand && AbstractWand.ShapeHelper.getShapeComplete(nbt)) {
 
-            int[] blockQueue = item.getOrCreateTag().getIntArray("blockQueue");
+            List<BlockPos> blockQueue = AbstractWand.ShapeHelper.getQueue(nbt);
         /*
                 int[] b1 = item.getOrCreateTag().getIntArray("P1");
                 int[] b2 = item.getOrCreateTag().getIntArray("P2");
@@ -69,16 +74,13 @@ public class BuildingWandRenderer {
                 }
 
          */
-                if (blockQueue.length > 0){
+                if (!blockQueue.isEmpty()){
                     if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
                         Vec3 campos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
                         //LOGGER.info("RENDER BLOCK GHOST");
-                        for (int i = 0; i < blockQueue.length; i = i + 3) {
-                            BlockPos pos = new BlockPos(blockQueue[i], blockQueue[i + 1], blockQueue[i + 2]);
-                            //drawBlockTexture(event, event.getPoseStack(), pos, campos, Blocks.STONE);
-
+                        for (BlockPos b : blockQueue) {
                             VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypes.PREVIEW);
-                            renderBlockAt(event.getPoseStack(),buffer,Blocks.STONE.defaultBlockState(),pos);
+                            renderBlockAt(event.getPoseStack(),buffer,Blocks.STONE.defaultBlockState(),b);
 
                         }
                     }

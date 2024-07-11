@@ -46,6 +46,7 @@ public class ClientEvents {
                 if (item.getItem() instanceof BuildWand) {
                     if (KeyBinding.SHAPE_SWITCH_KEY.consumeClick()) {
                         ((BuildWand) item.getItem()).switchBuildMode(player);
+                        player.sendSystemMessage(Component.literal("Switch Build Shape"));
                         Messages.sendToServer(new BuildWandShapeChangePacket());
                     }
                 }

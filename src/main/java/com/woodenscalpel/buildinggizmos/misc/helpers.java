@@ -72,13 +72,24 @@ public class helpers {
 
         int[] posintarray = new int[lenCoords];
         int i = 0;
+        for(int block =0; block<lenBlocks; block++) {
+            for (int coord = 0; coord < 3; coord++, i++) {
+                switch (coord) {
+                    case 0:
+                        posintarray[i] = (int) (poslist.get(block).x * badscale);
+                        break;
+                    case 1:
+                        posintarray[i] = (int) (poslist.get(block).y * badscale);
+                        break;
+                    case 2:
+                        posintarray[i] = (int) (poslist.get(block).z * badscale);
+                        break;
+                }
 
-        for(int block =0; block<lenBlocks; block++){
-                        posintarray[i] = (int) (poslist.get(block).x*badscale);
-                        posintarray[i] = (int) (poslist.get(block).y*badscale);
-                        posintarray[i] = (int) (poslist.get(block).z*badscale);
-
+            }
         }
+
+
 
         tag.putIntArray(tagname,posintarray);
 
@@ -127,6 +138,14 @@ public class helpers {
     }
     public static Vec3 blockPostoVec3(BlockPos pos){
         return new Vec3(pos.getX(),pos.getY(),pos.getZ());
+    }
+
+    public static List<Vec3> blockPostoVec3(List<BlockPos> pos){
+        List<Vec3> vec3s = new ArrayList<>();
+        for(BlockPos b : pos){
+            vec3s.add(blockPostoVec3(b));
+        }
+        return vec3s;
     }
 
 }

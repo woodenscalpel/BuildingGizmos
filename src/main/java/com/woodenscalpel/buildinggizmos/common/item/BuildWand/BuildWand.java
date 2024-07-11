@@ -40,11 +40,6 @@ import java.util.List;
 public class BuildWand extends AbstractWand {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    int TESTLINE = 0;
-    int CURRENTSHAPE = 0;
-    ShapeModes currentShape = ShapeModes.LINE;
-
-
 
     public BuildWand(Properties properties) {
         super(properties.stacksTo(1));
@@ -64,7 +59,8 @@ public class BuildWand extends AbstractWand {
         //ItemStack item = getRandomFromPallet(player,wand);
 
         int queuelen = wand.getOrCreateTag().getInt("queueLen");
-        int blocklen = (wand.getOrCreateTag().getIntArray("blockQueue").length+3)/3;
+        CompoundTag nbt = wand.getOrCreateTag();
+        int blocklen = (ShapeHelper.getQueue(nbt).size()+1);
 
         BuildingGizmos.LOGGER.info("LOG");
         BuildingGizmos.LOGGER.info(String.valueOf(queuelen));
@@ -81,79 +77,11 @@ public class BuildWand extends AbstractWand {
 
     }
 
-    @Override
-    protected void setBlockQueue(List<BlockPos> controlPoints, CompoundTag nbt) {
-        BlockPos p1 = controlPoints.get(0);
-        BlockPos p2 = controlPoints.get(1);
-
-
-        //List<BlockPos> linepos = new Bresenham3D().drawLine(p1,p2);
-
-        //List<BlockPos> linepos = new Line(p1,p2).getCoords();
-        //List<BlockPos> linepos = new UnoptomizedCatDraw().getblocks(p1,p2);
-
-        ShapeModes shape = enumNbt.getshapeenum(nbt,"BUILDMODE");
-
-        List<BlockPos> points = new ArrayList<>();
-        points.add(p1);
-        points.add(p2);
-
-        List<BlockPos> queue = new ArrayList<>();
-
-        switch(shape){
-            case LINE:
-                queue = new Line(p1,p2).getCoords();
-                break;
-            case CIRCLE:
-                queue = new Circle(p1,p2).getCoords();
-
-                break;
-            case CAT:
-                double defaultlength = helpers.blockPostoVec3(p2).subtract(helpers.blockPostoVec3(p1)).length()*1.1;
-                queue = new Catenary(p1,p2,defaultlength).getCoords();
-
-                break;
-            case CUBICBEZIER:
-                queue = new ParameterizedCubicBezier(controlPoints).getblocks();
-                break;
-            case QUADBEZIER:
-                queue = new QuadBez(controlPoints).getCoords();
-                BuildingGizmos.LOGGER.info(queue.toString());
-                break;
-        }
-
-        //Hack to determine gradient at runtime by storing total length of list and then can determine how far you are through the list by comparing current length of queue to original length
-        nbt.putInt("queueLen",queue.size());
-
-        helpers.putBlockList(nbt,"blockQueue", (ArrayList<BlockPos>) queue);
-    }
 
     public void switchBuildMode(Player player) {
         ItemStack item = player.getMainHandItem();
         CompoundTag nbt = item.getOrCreateTag();
-        ShapeModes shape = enumNbt.getshapeenum(nbt,"BUILDMODE");
-        shape = shape.cycle();
-        enumNbt.setshapeenum(shape,nbt,"BUILDMODE");
-
-        switch(shape){
-            case LINE:
-                setNumControlPoints(nbt,2);
-                break;
-            case CIRCLE:
-                setNumControlPoints(nbt,2);
-                break;
-            case CAT:
-                setNumControlPoints(nbt,2);
-                break;
-            case CUBICBEZIER:
-                setNumControlPoints(nbt,4);
-                break;
-            case QUADBEZIER:
-                setNumControlPoints(nbt,3);
-                break;
-        }
-
-        player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
+        AbstractWand.ShapeHelper.cycleShape(nbt);
     }
 }
 

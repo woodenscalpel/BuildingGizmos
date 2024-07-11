@@ -50,6 +50,11 @@ public class Box {
         this(new BlockPos(b1[0],b1[1],b1[2]), new BlockPos(b2[0],b2[1],b2[2]));
     }
 
+    public Box(Vec3 vec3, Vec3 vec31) {
+        this(new int[] {(int) vec3.x, (int) vec3.y, (int) vec3.z}, new int[] {(int) vec31.x, (int) vec31.y, (int) vec31.z});
+    }
+
+
     public ArrayList<BlockPos> getBlockList(){
         return blocks;
     }

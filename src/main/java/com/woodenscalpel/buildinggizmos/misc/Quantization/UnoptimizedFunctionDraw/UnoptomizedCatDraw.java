@@ -1,6 +1,7 @@
 package com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw;
 
 import com.woodenscalpel.buildinggizmos.misc.CatenaryHelper.CatHelper;
+import com.woodenscalpel.buildinggizmos.misc.helpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
@@ -20,7 +21,7 @@ public class UnoptomizedCatDraw {
 
         double tests = Math.sqrt(start.distSqr(new Vec3i(end.getX(),end.getY(),end.getZ())))*1.1;
 
-        List<Vec3> points = new CatHelper().getCatPoints(start.getX(),start.getY(),start.getZ(), end.getX(), end.getY(),end.getZ(),tests);
+        List<Vec3> points = new CatHelper().getCatPoints(helpers.blockPostoVec3(start), helpers.blockPostoVec3(end),tests);
 
         for(Vec3 point: points){
 

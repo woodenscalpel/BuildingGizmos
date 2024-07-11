@@ -1,6 +1,7 @@
 package com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDraw;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
+import com.woodenscalpel.buildinggizmos.misc.helpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
@@ -8,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ParameterizedNormalizedCurve {
-    List<BlockPos> points;
-    public ParameterizedNormalizedCurve(List<BlockPos> points){
+    List<Vec3> points;
+    public ParameterizedNormalizedCurve(List<Vec3> points){
         this.points = points;
     }
 
@@ -38,7 +39,7 @@ public abstract class ParameterizedNormalizedCurve {
     }
 
     public List<BlockPos> getblocks() {
-        BlockPos start = this.points.get(0);
+        BlockPos start = helpers.vec3toBlockPos(this.points.get(0));
         return getblocks(start);
     }
     BlockPos closest(Vec3 point, BlockPos current){

@@ -9,8 +9,7 @@ import java.util.List;
 public class Bresenham3D {
 
     public List<BlockPos> drawLine(BlockPos start, BlockPos end){
-        List<BlockPos> line = plotLine3d(start.getX(),start.getY(),start.getZ(),end.getX(),end.getY(),end.getZ());
-        return line;
+        return plotLine3d(start.getX(),start.getY(),start.getZ(),end.getX(),end.getY(),end.getZ());
     }
 
     private List<BlockPos> plotLine3d(int x0, int y0, int z0, int x1, int y1, int z1)

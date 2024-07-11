@@ -13,7 +13,7 @@ import java.util.List;
 
 public  class ParameterizedCircle extends ParameterizedNormalizedCurve{
     private static final Logger LOGGER = LogUtils.getLogger();
-    public ParameterizedCircle(List<BlockPos> points) {
+    public ParameterizedCircle(List<Vec3> points) {
         super(points);
     }
 
@@ -21,8 +21,8 @@ public  class ParameterizedCircle extends ParameterizedNormalizedCurve{
     Vec3 f(double t) {
         //TODO Builds circle beziers every call. should only do it on construction. its easy fix but it is also 3am :^)
         //assume vertically facing for now
-        Vec3 p0 = helpers.blockPostoVec3(points.get(0));
-        Vec3 p1 = helpers.blockPostoVec3(points.get(1));
+        Vec3 p0 = points.get(0);
+        Vec3 p1 = points.get(1);
 
         double r = p1.subtract(p0).length();
         double tan =0.552284749831 ; //(4/3)*tan(pi/8) = 4*(sqrt(2)-1)/3 = 0.552284749831
@@ -31,11 +31,11 @@ public  class ParameterizedCircle extends ParameterizedNormalizedCurve{
         Vec3 p3 = p1.add(0,tan*r,0);
         Vec3 p4 = p2.add((p1.x - p0.x)*tan,0,(p1.z-p0.z)*tan);
 
-        List<BlockPos> bpoints = new ArrayList<>();
-        bpoints.add(new BlockPos(p2));
-        bpoints.add(new BlockPos(p4));
-        bpoints.add(new BlockPos(p3));
-        bpoints.add(new BlockPos(p1));
+        List<Vec3> newpoints = new ArrayList<>();
+        newpoints.add((p2));
+        newpoints.add((p4));
+        newpoints.add((p3));
+        newpoints.add((p1));
 
         /*
         LOGGER.info("ttt");
@@ -46,7 +46,7 @@ public  class ParameterizedCircle extends ParameterizedNormalizedCurve{
         LOGGER.info(String.valueOf(p4));
         */
 
-        return new ParameterizedCubicBezier(bpoints).f(t);
+        return new ParameterizedCubicBezier(newpoints).f(t);
     }
     @Override
     public List<BlockPos> getblocks(BlockPos start){
@@ -56,7 +56,7 @@ public  class ParameterizedCircle extends ParameterizedNormalizedCurve{
 
         BlockPos current = start;
 
-        Vec3 p0 = helpers.blockPostoVec3(points.get(0));
+        Vec3 p0 =  points.get(0);
 
         for(float t = 0; t<1; t+= 0.001F){
 
