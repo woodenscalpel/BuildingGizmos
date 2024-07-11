@@ -3,6 +3,7 @@ package com.woodenscalpel.buildinggizmos.common.item.abstractwand;
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.ShapeModes;
+import com.woodenscalpel.buildinggizmos.misc.Raycast;
 import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
@@ -12,11 +13,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -38,6 +42,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     //Palette modes
     static final int MODE_HOTBAR = 0;
     static final int MODE_PALLET = 1;
+    static final String modeTag = "MODE";
 
 
     public AbstractWand(Properties pProperties) {
@@ -47,6 +52,55 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     public void openPalletScreen(){
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT,() -> ClientHooks::openTextureWandScreen);
     }
+
+    @Override
+    public int getUseDuration(ItemStack pStack) {
+        return 99999;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+        ItemStack item = pPlayer.getItemInHand(pUsedHand);
+        CompoundTag nbt = item.getOrCreateTag();
+
+
+        if(ShapeHelper.getShapeComplete(nbt)) {
+
+            List<Vec3> controlPoints = AbstractWand.ShapeHelper.getControlPoints(nbt);
+            List<ControlPoint> controlPointHitboxes = new ArrayList<>();
+
+            Raycast rc = new Raycast();
+            List<Vec3> nudgedControlPoints = new ArrayList<>();
+            for (Vec3 cp : controlPoints) {
+                ControlPoint tempcp = new ControlPoint(cp);
+                Vec3 nudgedcp = cp.add(tempcp.getNudgeFromRaycast(rc));
+                nudgedControlPoints.add(nudgedcp);
+            }
+            ShapeHelper.redrawShapeAndQueue(nbt, nudgedControlPoints);
+        }
+
+
+
+
+        pPlayer.startUsingItem(pUsedHand);
+        // return InteractionResultHolder.consume(item);
+        return ItemUtils.startUsingInstantly(pLevel,pPlayer,pUsedHand);
+        //BuildingGizmos.LOGGER.info("USE");
+        //return super.use(pLevel, pPlayer, pUsedHand);
+    }
+
+    @Override
+    public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
+        BuildingGizmos.LOGGER.info("USING");
+        super.onUsingTick(stack, player, count);
+    }
+
+    @Override
+    public void onUseTick(Level pLevel, LivingEntity pLivingEntity, ItemStack pStack, int pRemainingUseDuration) {
+        BuildingGizmos.LOGGER.info("USING2");
+        super.onUseTick(pLevel, pLivingEntity, pStack, pRemainingUseDuration);
+    }
+
 
     @Override
     public @NotNull InteractionResult useOn(UseOnContext context) {
@@ -71,13 +125,12 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
                     Box area = new Box(b1,b2);
 
-                    BlockPos blockClicked = context.getClickedPos();
                     if (area.contains(context.getClickedPos())) {
 
                         nbt.putInt("state", IN_USE);
                     }
                     else{
-                        //LOGGER.info("Not in area");
+                        BuildingGizmos.LOGGER.info("Not in area");
                     }
 
                 }
@@ -100,7 +153,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
 
     @Override
-    public void inventoryTick(ItemStack itemStack, Level level, Entity entity, int i, boolean b) {
+    public void inventoryTick(@NotNull ItemStack itemStack, Level level, @NotNull Entity entity, int i, boolean b) {
         if (!level.isClientSide()) {
             CompoundTag nbt = itemStack.getOrCreateTag();
 
@@ -134,18 +187,18 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     public void switchMode(Player player){
         ItemStack item = player.getMainHandItem();
         CompoundTag nbt = item.getOrCreateTag();
-        int CURRENT_MODE = nbt.getInt("MODE");
+        int CURRENT_MODE = nbt.getInt(modeTag);
         switch (CURRENT_MODE){
             case MODE_HOTBAR:
 
                 //LOGGER.info("switching mode to 1");
                 player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
 
-                nbt.putInt("MODE",MODE_PALLET);
+                nbt.putInt(modeTag,MODE_PALLET);
                 //LOGGER.info(String.valueOf(nbt.getInt("MODE")));
                 break;
             case MODE_PALLET:
-                nbt.putInt("MODE",MODE_HOTBAR);
+                nbt.putInt(modeTag,MODE_HOTBAR);
                 break;
         }
     }
@@ -184,7 +237,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
     protected ItemStack getRandomFromPallet(Player player, ItemStack itemStack){
         CompoundTag nbt = itemStack.getOrCreateTag();
-        int MODE = nbt.getInt("MODE");
+        int MODE = nbt.getInt(modeTag);
         //LOGGER.info(String.valueOf(MODE));
         //LOGGER.info(Arrays.toString(nbt.getIntArray("palletIDs")));
 
@@ -194,41 +247,26 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
     protected ItemStack getGradientFromPallet(Player player, ItemStack itemStack,double percent){
         CompoundTag nbt = itemStack.getOrCreateTag();
-        int MODE = nbt.getInt("MODE");
+        int MODE = nbt.getInt(modeTag);
         //LOGGER.info(String.valueOf(MODE));
         //LOGGER.info(Arrays.toString(nbt.getIntArray("palletIDs")));
 
         List<ItemStack> palette = getPaletteFromMode(player,itemStack,MODE);
+        /*
         BuildingGizmos.LOGGER.info("WTF");
         BuildingGizmos.LOGGER.info(String.valueOf(palette.size()));
         BuildingGizmos.LOGGER.info(String.valueOf((palette.size()-1)));
         BuildingGizmos.LOGGER.info(String.valueOf(Math.floor(((palette.size()-1))*percent)));
+         */
         return palette.get((int) Math.floor((palette.size()-1)*percent));
     }
 
 
 
-    public int getNumControlPoints(CompoundTag nbt){
-        int controlpoints = nbt.getInt("NCONTROLPOINTS");
-        if (controlpoints == 0){ controlpoints = 2;} //default of 2
-        return controlpoints;
-    }
-    public void setNumControlPoints(CompoundTag nbt,int n){
-       nbt.putInt("NCONTROLPOINTS",n);
-    }
-    public List<BlockPos> getControlPoints(CompoundTag nbt){
-        return helpers.getBlockList(nbt,"CONTROLPOINTS");
-    }
-
-    public void setControlPoints(CompoundTag nbt, List<BlockPos> cp) {
-        helpers.putBlockList(nbt,"CONTROLPOINTS",cp);
-    }
-
     protected abstract void processCoord(Player player, Level level, ItemStack itemStack, BlockPos nextblock);
 
 
     public static class ShapeHelper {
-        static String NpointsTag = "NCONTROLPOINTS";
 
         static String ConstructorPointsTag = "CONSTRUCTORPOINTS";
         static String ControlPointsTag = "CONTROLPOINTS";
@@ -282,6 +320,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
         public static void cycleShape(CompoundTag nbt) {
             setShape(nbt, getShape(nbt).cycle());
+            SetShapeComplete(nbt,false);
         }
 
 
@@ -300,11 +339,11 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
                 constPoints.add(p1);
                 setConstructorPoints(nbt, constPoints);
                 List<Vec3> cp = shape.getControlPointsFromConstructorPoints(constPoints);
-                BuildingGizmos.LOGGER.info(String.valueOf(cp));
+               // BuildingGizmos.LOGGER.info(String.valueOf(cp));
                 setControlPoints(nbt,cp);
                 ConstructShapeAndSetQueue(nbt);
                 SetShapeComplete(nbt,true);
-                BuildingGizmos.LOGGER.info(String.valueOf(getShapeComplete(nbt)));
+              //  BuildingGizmos.LOGGER.info(String.valueOf(getShapeComplete(nbt)));
             } else { // CLEAR CONTROL POINTS AND SET THIS ONE AS FIRST ONE
                 SetShapeComplete(nbt,false);
                 List<BlockPos> newlist = new ArrayList<>();
@@ -314,14 +353,19 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
         }
         public static void ConstructShapeAndSetQueue(CompoundTag nbt){
             List<Vec3> cp = getControlPoints(nbt);
-            BuildingGizmos.LOGGER.info(String.valueOf(cp));
+           // BuildingGizmos.LOGGER.info(String.valueOf(cp));
             ShapeModes shape = getShape(nbt);
             List<BlockPos> blocks = shape.getShapeFromControlPoints(cp);
-            BuildingGizmos.LOGGER.info(String.valueOf(blocks));
+           // BuildingGizmos.LOGGER.info(String.valueOf(blocks));
             nbt.putInt("queueLen",blocks.size()); //TODO hack for gradient
             setBuildQueue(nbt,blocks);
-
-
+        }
+        public static void redrawShapeAndQueue(CompoundTag nbt, List<Vec3> cp){
+            setControlPoints(nbt,cp);
+            ShapeModes shape = getShape(nbt);
+            List<BlockPos> blocks = shape.getShapeFromControlPoints(cp);
+            nbt.putInt("queueLen",blocks.size()); //TODO hack for gradient
+            setBuildQueue(nbt,blocks);
         }
 
     }

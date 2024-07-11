@@ -13,7 +13,7 @@ public class Vec3Box {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    double minx,miny,minz,maxx,maxy,maxz;
+    public double minx,miny,minz,maxx,maxy,maxz;
 
 
     public Vec3Box(Vec3 p1, Vec3 p2){
@@ -34,18 +34,24 @@ public class Vec3Box {
         maxz = Math.max(z1,z2);
     }
 
-    public Vec3Box(int[] b1, int[] b2) {
-        this(new Vec3(b1[0],b1[1],b1[2]), new Vec3(b2[0],b2[1],b2[2]));
-    }
-
-
-    public AABB renderBox(){
-        return new AABB(minx,miny,minz,maxx,maxy,maxz);
-    }
-
     public boolean contains(Vec3 r) {
 
 
         return((minx <= r.x && r.x <= maxx)&& (miny <= r.y && r.y <= maxy) &&( minz <= r.z && r.z <= maxz));
+    }
+
+    public void move(double v, double v1, double v2) {
+       this.minx += v;
+       this.maxx += v;
+
+        this.miny += v1;
+        this.maxy += v1;
+
+        this.minz += v2;
+        this.maxz += v2;
+    }
+
+    public AABB getAABB() {
+        return new AABB(minx,miny,minz,maxx,maxy,maxz);
     }
 }

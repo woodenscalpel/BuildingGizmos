@@ -13,7 +13,7 @@ public class Raycast {
     public Raycast(){
         this.points = new ArrayList<>();
         double maxrange = 50;
-        double resolution = 10; //10 points a block is probably overkill
+        double resolution = 50; //50 points a block is probably overkill
 
 
         Vec3 campos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();

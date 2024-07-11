@@ -14,6 +14,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.woodenscalpel.buildinggizmos.misc.helpers.blockPostoVec3;
+
 public enum ShapeModes {
     LINE(2),CIRCLE(2),CAT(2),CUBICBEZIER(2),QUADBEZIER(2),FILLEDCUBE(2);
 
@@ -38,19 +40,22 @@ public enum ShapeModes {
 
     public List<Vec3> getControlPointsFromConstructorPoints(List<BlockPos> constructor) {
         List<Vec3> control = new ArrayList<>();
+        Vec3 lenvec;
         switch(this){
             case LINE, FILLEDCUBE, CIRCLE, CAT:
-                return helpers.blockPostoVec3(constructor);
+                return blockPostoVec3(constructor);
             case CUBICBEZIER:
-                control.add(helpers.blockPostoVec3(constructor.get(0)));
-                control.add(helpers.blockPostoVec3(constructor.get(1)).scale((double) 1 /3));
-                control.add(helpers.blockPostoVec3(constructor.get(1)).scale((double) 2 /3));
-                control.add(helpers.blockPostoVec3(constructor.get(1)));
+                control.add(blockPostoVec3(constructor.get(0)));
+                lenvec = blockPostoVec3(constructor.get(1)).subtract(blockPostoVec3(constructor.get(0)));
+                control.add(blockPostoVec3(constructor.get(0)).add(lenvec.scale(0.3333)));
+                control.add(blockPostoVec3(constructor.get(0)).add(lenvec.scale(0.6666)));
+                control.add(blockPostoVec3(constructor.get(1)));
                 return control;
             case QUADBEZIER:
-                control.add(helpers.blockPostoVec3(constructor.get(0)));
-                control.add(helpers.blockPostoVec3(constructor.get(1)).scale((double) 1 /2));
-                control.add(helpers.blockPostoVec3(constructor.get(1)));
+                control.add(blockPostoVec3(constructor.get(0)));
+                lenvec = blockPostoVec3(constructor.get(1)).subtract(blockPostoVec3(constructor.get(0)));
+                control.add(blockPostoVec3(constructor.get(0)).add(lenvec.scale(0.5)));
+                control.add(blockPostoVec3(constructor.get(1)));
                 return control;
         }
         return control;

@@ -45,14 +45,7 @@ public class BuildWand extends AbstractWand {
         super(properties.stacksTo(1));
     }
 
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
-        ControlPoint testbox = new ControlPoint(new Vec3(0,100,0));
 
-        testbox.handleRaycast(new Raycast());
-
-        return super.use(pLevel, pPlayer, pUsedHand);
-    }
 
     @Override
     protected void processCoord(Player player, Level level, ItemStack wand, BlockPos nextblock) {
