@@ -27,7 +27,7 @@ public class WorldInventoryInterface {
     }
 
     public static void safePlaceBlock(Player player, ItemStack item, Level level, BlockPos pos){
-        if(canPlace(level,pos) &&(hasItem(player,item) || player.isCreative())){
+        if(canPlace(level,pos) &&(hasItem(player,item) || player.isCreative()) && item != null){
             if(!player.isCreative()) {
                 removeItem(player, item);
             }
@@ -66,9 +66,10 @@ public class WorldInventoryInterface {
     }
 
     public static boolean hasItem(Player player, ItemStack item) {
-        if(item == ItemStack.EMPTY){
+        if(item == ItemStack.EMPTY || item == null){
             return false;
         }
+        LOGGER.info(String.valueOf(item));
         return player.getInventory().contains(item);
     }
 
@@ -78,7 +79,7 @@ public class WorldInventoryInterface {
     }
 
     public static void swaporPlaceBlock(Player player, ItemStack item, Level level, BlockPos pos) {
-        if(canDestroy(level,pos) && (validSwap(level,pos) || canPlace(level,pos)) &&(hasItem(player,item) || player.isCreative())){
+        if(canDestroy(level,pos) && (validSwap(level,pos) || canPlace(level,pos)) &&(hasItem(player,item) || player.isCreative()) && item != null){
             destroyBlock(player,level,pos,true);
             if(!player.isCreative()) {
                 removeItem(player, item);
