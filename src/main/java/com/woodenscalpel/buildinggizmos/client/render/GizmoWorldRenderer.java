@@ -34,7 +34,6 @@ import java.util.List;
 
 @Mod.EventBusSubscriber(modid = BuildingGizmos.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class GizmoWorldRenderer {
-    private static final Logger LOGGER = LogUtils.getLogger();
 @SubscribeEvent
    public static void RenderLevelStageEvent(RenderLevelStageEvent event)
 {
@@ -57,7 +56,8 @@ public class GizmoWorldRenderer {
 
 
                         //BIG BOUNDING BOX***********************************************************************************
-                        AABB shape3 = new Box(cplist.get(0),cplist.get(1)).renderBox().move(-px, -py, -pz);
+                        //AABB shape3 = new Box(cplist.get(0),cplist.get(1)).renderBox().move(-px, -py, -pz);
+                        AABB shape3 = getVec3BB(cplist).move(-px, -py, -pz);
                         //BuildingGizmos.LOGGER.info(String.valueOf(shape3));
 
                        drawLineBox(event.getPoseStack(), shape3, 1.0f, 0.3f, 1.0f, 1.0f);
@@ -66,14 +66,14 @@ public class GizmoWorldRenderer {
 
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
                 //BLOCK GHOSTS
-
-                if (!blockQueue.isEmpty()){
+            if(!(item.getItem() instanceof TextureWand)) {
+                if (!blockQueue.isEmpty()) {
                     for (BlockPos b : blockQueue) {
                         VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderTypes.PREVIEW);
-                        renderBlockAt(event.getPoseStack(),buffer, Blocks.STONE.defaultBlockState(),b);
+                        renderBlockAt(event.getPoseStack(), buffer, Blocks.STONE.defaultBlockState(), b);
                     }
                 }
-
+            }
 
             }
 
@@ -93,6 +93,25 @@ public class GizmoWorldRenderer {
 
             }
 
+    }
+
+    private static AABB getVec3BB(List<Vec3> cplist) {
+    double minx = cplist.get(0).x;
+    double miny = cplist.get(0).y;
+    double minz = cplist.get(0).z;
+    double maxx = cplist.get(0).x;
+    double maxy = cplist.get(0).y;
+    double maxz = cplist.get(0).z;
+    for(Vec3 v : cplist){
+        minx = Math.min(minx,v.x);
+        miny = Math.min(miny,v.y);
+        minz = Math.min(minz,v.z);
+        maxx = Math.max(maxx,v.x);
+        maxy = Math.max(maxy,v.y);
+        maxz = Math.max(maxz,v.z);
+    }
+
+    return new AABB((int) minx, (int) miny, (int) minz, (int) maxx+1, (int) maxy+1,(int) maxz+1);
     }
 
     public static void drawLineBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {

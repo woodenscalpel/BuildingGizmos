@@ -5,11 +5,13 @@ import com.woodenscalpel.buildinggizmos.client.keys.KeyBinding;
 import com.woodenscalpel.buildinggizmos.client.render.entity.TestEntityRenderer;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildWand;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
+import com.woodenscalpel.buildinggizmos.common.item.abstractwand.ModeEnums;
+import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
 import com.woodenscalpel.buildinggizmos.init.EntityInit;
 import com.woodenscalpel.buildinggizmos.networking.Messages;
-import com.woodenscalpel.buildinggizmos.networking.packet.BuildWandShapeChangePacket;
-import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandModeChangePacket;
+import com.woodenscalpel.buildinggizmos.networking.packet.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,22 +33,43 @@ public class ClientEvents {
             if(player != null) {
                 ItemStack item = player.getMainHandItem();
                 if (item.getItem() instanceof AbstractWand) {
+                    AbstractWand wand = (AbstractWand) item.getItem();
 
                     if (KeyBinding.MODE_SWITCH_KEY.consumeClick()) {
-                        ((AbstractWand) item.getItem()).switchMode(player);
+                        ((AbstractWand) item.getItem()).switchPaletteMode(player);
                         Messages.sendToServer(new TextureWandModeChangePacket());
+                        CompoundTag nbt = item.getOrCreateTag();
+                        player.sendSystemMessage(Component.literal("Switch Palette Source to ").append(Component.translatable(AbstractWand.getPaletteSource(nbt).name)));
                     }
 
                     if (KeyBinding.PALLET_MENU_KEY.consumeClick()) {
-                        player.sendSystemMessage(Component.literal("Pressed Pallet Menu"));
                         ((AbstractWand) item.getItem()).openPalletScreen();
                     }
+                    if (KeyBinding.WAND_BUILD_KEY.consumeClick()) {
+                        ((AbstractWand) item.getItem()).build(item);
+                        Messages.sendToServer(new WandBuildPacket());
+                    }
+                    if (KeyBinding.WAND_PLACEMENTMODE_KEY.consumeClick()) {
+                        ((AbstractWand) item.getItem()).switchPlacementMode(item);
+                        CompoundTag nbt = item.getOrCreateTag();
+                        player.sendSystemMessage(Component.literal("Switched Placement Mode to: ").append(Component.translatable(AbstractWand.getPlacementMode(nbt).name)));
+                        Messages.sendToServer(new WandPlacementModePacket());
+                    }
+
 
                 }
-                if (item.getItem() instanceof BuildWand) {
+
+                if (item.getItem() instanceof AbstractWand && !(item.getItem() instanceof TextureWand)) {
+                    if (KeyBinding.WAND_SWAPMODE_KEY.consumeClick()) {
+                        ((AbstractWand) item.getItem()).switchSwapMode(item);
+                        CompoundTag nbt = item.getOrCreateTag();
+                        player.sendSystemMessage(Component.literal("Switch Swap/Place Mode to: ").append(Component.translatable(AbstractWand.getSwapMode(nbt).name)));
+                        Messages.sendToServer(new WandSwapModePacket());
+                    }
                     if (KeyBinding.SHAPE_SWITCH_KEY.consumeClick()) {
-                        ((BuildWand) item.getItem()).switchBuildMode(player);
-                        player.sendSystemMessage(Component.literal("Switch Build Shape"));
+                        ((AbstractWand) item.getItem()).switchBuildMode(player);
+                        CompoundTag nbt = item.getOrCreateTag();
+                        player.sendSystemMessage(Component.literal("Switch Build Shape to: ").append(Component.translatable(AbstractWand.ShapeHelper.getShape(nbt).name)));
                         Messages.sendToServer(new BuildWandShapeChangePacket());
                     }
                 }
@@ -60,6 +83,10 @@ public class ClientEvents {
         public static void onKeyRegister(RegisterKeyMappingsEvent event){
             event.register(KeyBinding.MODE_SWITCH_KEY);
             event.register(KeyBinding.PALLET_MENU_KEY);
+            event.register(KeyBinding.SHAPE_SWITCH_KEY);
+            event.register(KeyBinding.WAND_BUILD_KEY);
+            event.register(KeyBinding.WAND_PLACEMENTMODE_KEY);
+            event.register(KeyBinding.WAND_SWAPMODE_KEY);
         }
 
         @SubscribeEvent

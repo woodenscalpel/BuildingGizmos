@@ -1,5 +1,6 @@
 package com.woodenscalpel.buildinggizmos.networking.packet;
 
+import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildWand;
 import com.woodenscalpel.buildinggizmos.common.item.abstractwand.AbstractWand;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -10,13 +11,12 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 
-
-public class TextureWandModeChangePacket {
-    public TextureWandModeChangePacket(){
+public class WandBuildPacket {
+    public WandBuildPacket(){
 
     }
 
-    public TextureWandModeChangePacket(FriendlyByteBuf buf){
+    public WandBuildPacket(FriendlyByteBuf buf){
 
     }
 
@@ -31,7 +31,8 @@ public class TextureWandModeChangePacket {
             ServerLevel level = player.getLevel();
 
             ItemStack item = player.getMainHandItem();
-            ((AbstractWand) item.getItem()).switchPaletteMode(player);
+
+            ((AbstractWand) item.getItem()).build(item);
         });
         return true;
 

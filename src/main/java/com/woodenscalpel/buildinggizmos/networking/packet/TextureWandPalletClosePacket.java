@@ -42,7 +42,7 @@ public class TextureWandPalletClosePacket {
             ((AbstractWand) item.getItem()).savePalette(itemstacks,item);
 
 
-            //((TextureWand) item.getItem()).switchMode();
+            //((TextureWand) item.getItem()).switchPaletteMode();
         });
         return true;
 

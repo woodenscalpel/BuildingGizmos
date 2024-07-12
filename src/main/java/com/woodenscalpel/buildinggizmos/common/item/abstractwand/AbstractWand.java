@@ -3,12 +3,16 @@ package com.woodenscalpel.buildinggizmos.common.item.abstractwand;
 import com.mojang.math.Vector3f;
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
 import com.woodenscalpel.buildinggizmos.client.ClientHooks;
+import com.woodenscalpel.buildinggizmos.client.keys.KeyBinding;
 import com.woodenscalpel.buildinggizmos.common.item.BuildWand.BuildShapes.ShapeModes;
+import com.woodenscalpel.buildinggizmos.common.item.texturewand.TextureWand;
+import com.woodenscalpel.buildinggizmos.misc.InteractionLayer.WorldInventoryInterface;
 import com.woodenscalpel.buildinggizmos.misc.Raycast;
 import com.woodenscalpel.buildinggizmos.misc.enumnbt.enumNbt;
 import com.woodenscalpel.buildinggizmos.misc.helpers;
-import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -19,17 +23,15 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +43,15 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     //State machine states
     static final int SELECTING = 0;
     static final int IN_USE = 1;
+    static final String activeStateTag = "state";
 
     //Palette modes
-    static final int MODE_HOTBAR = 0;
-    static final int MODE_PALLET = 1;
     static final String modeTag = "MODE";
 
+    //Placement Modes
+    static final String placementModeTag = "PLACEMENTMODE";
+    //Swap Modes
+    static final String swapModeTag = "SWAPMODE";
 
     public AbstractWand(Properties pProperties) {
         super(pProperties.stacksTo(1));
@@ -59,6 +64,27 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     @Override
     public int getUseDuration(ItemStack pStack) {
         return 99999;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+        CompoundTag nbt = pStack.getOrCreateTag();
+        if(Screen.hasShiftDown()){
+            if(!(pStack.getItem() instanceof TextureWand)) {
+                pTooltipComponents.add(Component.literal("Current Shape: ").append(Component.translatable(ShapeHelper.getShape(nbt).name).withStyle(ChatFormatting.AQUA)).append(Component.literal(".     Hotkey: ").append(Component.keybind(KeyBinding.KEY_SHAPE_SWITCH).withStyle(ChatFormatting.YELLOW))));
+            }
+            pTooltipComponents.add(Component.literal("Block Palette Source: ").append(Component.translatable(getPaletteSource(nbt).name).withStyle(ChatFormatting.AQUA)).append(Component.literal(".     Hotkey: ").append(Component.keybind(KeyBinding.KEY_MODE_SWITCH).withStyle(ChatFormatting.YELLOW))));
+            pTooltipComponents.add(Component.literal("Palette Placement Mode: ").append(Component.translatable(getPlacementMode(nbt).name).withStyle(ChatFormatting.AQUA)).append(Component.literal(".     Hotkey: ").append(Component.keybind(KeyBinding.WAND_KEY_PLACEMENTMODE).withStyle(ChatFormatting.YELLOW))));
+            if(!(pStack.getItem() instanceof TextureWand)) {
+            pTooltipComponents.add(Component.literal("Swap/Place Mode: ").append(Component.translatable(getSwapMode(nbt).name).withStyle(ChatFormatting.AQUA)).append(Component.literal(".     Hotkey: ").append(Component.keybind(KeyBinding.WAND_KEY_SWAPMODE).withStyle(ChatFormatting.YELLOW))));
+            }
+            pTooltipComponents.add(Component.literal("Build Shape: ").append(Component.keybind(KeyBinding.WAND_KEY_BUILD).withStyle(ChatFormatting.YELLOW)));
+            pTooltipComponents.add(Component.literal("Palette Menu: ").append(Component.keybind(KeyBinding.KEY_PALLET_MENU).withStyle(ChatFormatting.YELLOW)));
+
+        }else{
+            pTooltipComponents.add(Component.literal("Press SHIFT for more info").withStyle(ChatFormatting.AQUA));
+        }
+        super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
     }
 
     @Override
@@ -123,7 +149,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
         double graby = nbt.getDouble("graby");
         double grabz = nbt.getDouble("grabz");
         Vec3 grabvec = new Vec3(grabx,graby,grabz);
-        BuildingGizmos.LOGGER.info(String.valueOf(axis));
+        //BuildingGizmos.LOGGER.info(String.valueOf(axis));
 
         Vec3 campos = Minecraft.getInstance().getEntityRenderDispatcher().camera.getPosition();
         Vector3f look = Minecraft.getInstance().getEntityRenderDispatcher().camera.getLookVector();
@@ -194,34 +220,8 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
             ItemStack item = context.getItemInHand();
             CompoundTag nbt = item.getOrCreateTag();
 
-
-
-            if (!Objects.requireNonNull(context.getPlayer()).isCrouching()) {
-                if (ShapeHelper.getShapeComplete(nbt)) {
-                    BuildingGizmos.LOGGER.info("SWAPPIGN");
-
-
-                    //if(context.getItemInHand().getOrCreateTag().getInt("ready") == 1){
-                    List<BlockPos> ConstPoints = ShapeHelper.getConstructorPoints(nbt);
-
-                    BlockPos b1 = ConstPoints.get(0);
-                    BlockPos b2 = ConstPoints.get(1);
-
-                    Box area = new Box(b1,b2);
-
-                    if (area.contains(context.getClickedPos())) {
-
-                        nbt.putInt("state", IN_USE);
-                    }
-                    else{
-                        BuildingGizmos.LOGGER.info("Not in area");
-                    }
-
-                }
-
-
-            } else {
-                switch (nbt.getInt("state")) {
+            if (Objects.requireNonNull(context.getPlayer()).isCrouching()) {
+                switch (nbt.getInt(activeStateTag)) {
                     case IN_USE:
                         break;
                     case SELECTING:
@@ -241,16 +241,16 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
         if (!level.isClientSide()) {
             CompoundTag nbt = itemStack.getOrCreateTag();
 
-            if (nbt.getInt("state") == IN_USE) {
+            if (nbt.getInt(activeStateTag) == IN_USE) {
 
                 //LOGGER.info("USING!");
                 List<BlockPos> blockQueue = ShapeHelper.getQueue(nbt);
 
                 if(blockQueue.isEmpty()) {
-                    nbt.putInt("state", SELECTING);
+                    nbt.putInt(activeStateTag, SELECTING);
                 }
 
-            if (nbt.getInt("state") == IN_USE) {
+            if (nbt.getInt(activeStateTag) == IN_USE) {
 
                 BlockPos nextblock = blockQueue.get(0);
                 blockQueue.remove(0);
@@ -268,31 +268,62 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
     }
 
 
-    public void switchMode(Player player){
+    public void switchPaletteMode(Player player){
         ItemStack item = player.getMainHandItem();
         CompoundTag nbt = item.getOrCreateTag();
-        int CURRENT_MODE = nbt.getInt(modeTag);
-        switch (CURRENT_MODE){
-            case MODE_HOTBAR:
+        cyclePaletteSource(nbt);
+    }
+    public static ModeEnums.PlacementModes getPlacementMode(CompoundTag nbt) {
+        return enumNbt.getplacementenum(nbt, placementModeTag);
+    }
+    public static void setPlacementMode(CompoundTag nbt, ModeEnums.PlacementModes s) {
+        enumNbt.setplacementenum(s,nbt, placementModeTag);
+    }
+    public static void cyclePlacementMode(CompoundTag nbt) {
+        setPlacementMode(nbt, getPlacementMode(nbt).cycle());
+    }
 
-                //LOGGER.info("switching mode to 1");
-                player.sendSystemMessage(Component.literal("Pressed Mode Switch"));
+    public static ModeEnums.SwapModes getSwapMode(CompoundTag nbt) {
+        return enumNbt.getswapenum(nbt, swapModeTag);
+    }
+    public static void setSwapMode(CompoundTag nbt, ModeEnums.SwapModes s) {
+        enumNbt.setswapenum(s,nbt, swapModeTag);
+    }
+    public static void cycleSwapMode(CompoundTag nbt) {
+        setSwapMode(nbt, getSwapMode(nbt).cycle());
+    }
+    public static ModeEnums.PaletteSourceModes getPaletteSource(CompoundTag nbt) {
+        return enumNbt.getpalettesourceenum(nbt, modeTag);
+    }
+    public static void setPaletteSource(CompoundTag nbt, ModeEnums.PaletteSourceModes s) {
+        enumNbt.setpalettesourceenum(s,nbt, modeTag);
+    }
+    public static void cyclePaletteSource(CompoundTag nbt) {
+        setPaletteSource(nbt, getPaletteSource(nbt).cycle());
+    }
 
-                nbt.putInt(modeTag,MODE_PALLET);
-                //LOGGER.info(String.valueOf(nbt.getInt("MODE")));
-                break;
-            case MODE_PALLET:
-                nbt.putInt(modeTag,MODE_HOTBAR);
-                break;
-        }
+
+
+    public void switchPlacementMode(ItemStack wand) {
+        cyclePlacementMode(wand.getOrCreateTag());
+    }
+    public void switchSwapMode(ItemStack wand) {
+        cycleSwapMode(wand.getOrCreateTag());
+    }
+
+
+    public void build(ItemStack wand){
+        CompoundTag nbt = wand.getOrCreateTag();
+        nbt.putInt(AbstractWand.activeStateTag,AbstractWand.IN_USE);
     }
 
     public List<ItemStack> getPaletteFromMode(Player player,ItemStack wand, int mode) {
-        switch (mode) {
-            case MODE_HOTBAR -> {
+        ModeEnums.PaletteSourceModes MODE = getPaletteSource(wand.getOrCreateTag());
+        switch (MODE) {
+            case HOTBAR -> {
                 return getHotbarpalette(player);
             }
-            case MODE_PALLET -> {
+            case PALETTEMENU -> {
                 return getPaletteItems(wand);
             }
         }
@@ -308,6 +339,11 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
             }
         }
         return  blocks;
+    }
+    public void switchBuildMode(Player player) {
+        ItemStack item = player.getMainHandItem();
+        CompoundTag nbt = item.getOrCreateTag();
+        AbstractWand.ShapeHelper.cycleShape(nbt);
     }
 
     private ItemStack RandomItemStack(List<ItemStack> list){
@@ -337,7 +373,7 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
 
         List<ItemStack> palette = getPaletteFromMode(player,itemStack,MODE);
         if(palette.isEmpty()){
-            return Blocks.STONE.asItem().getDefaultInstance(); //TODO fix this
+            return ItemStack.EMPTY;
         }
         /*
         BuildingGizmos.LOGGER.info("WTF");
@@ -345,12 +381,47 @@ public abstract class AbstractWand extends Item implements PaletteInterface{
         BuildingGizmos.LOGGER.info(String.valueOf((palette.size()-1)));
         BuildingGizmos.LOGGER.info(String.valueOf(Math.floor(((palette.size()-1))*percent)));
          */
-        return palette.get((int) Math.floor((palette.size()-1)*percent));
+        return palette.get((int) Math.round((palette.size()-1)*percent));
     }
 
 
 
-    protected abstract void processCoord(Player player, Level level, ItemStack itemStack, BlockPos nextblock);
+    protected void processCoord(Player player, Level level, ItemStack wand, BlockPos nextblock){
+        ItemStack item = getItemFromMode(player,wand);
+
+        ModeEnums.SwapModes MODE = getSwapMode(wand.getOrCreateTag());
+        switch (MODE){
+            case SWAP:
+                WorldInventoryInterface.swapBlock(player, item ,level,nextblock);
+                break;
+            case BUILD:
+                WorldInventoryInterface.safePlaceBlock(player, item ,level,nextblock);
+                break;
+            case SWAP_AND_BUILD:
+                WorldInventoryInterface.swaporPlaceBlock(player, item ,level,nextblock);
+                break;
+        }
+
+    }
+
+    private ItemStack getItemFromMode(Player player, ItemStack wand ) {
+        CompoundTag nbt = wand.getOrCreateTag();
+        ModeEnums.PlacementModes MODE = getPlacementMode(nbt);
+        switch (MODE){
+            case RANDOM:
+                return getRandomFromPallet(player,wand);
+            case GRADIENT:
+                int queuelen = wand.getOrCreateTag().getInt("queueLen");
+                int blocklen = (ShapeHelper.getQueue(nbt).size()+1);
+
+                float percentage = (float) blocklen/queuelen;
+
+                return getGradientFromPallet(player,wand,percentage);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    ;
 
 
     public static class ShapeHelper {

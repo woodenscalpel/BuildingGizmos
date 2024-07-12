@@ -10,13 +10,12 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 
-
-public class TextureWandModeChangePacket {
-    public TextureWandModeChangePacket(){
+public class WandSwapModePacket {
+    public WandSwapModePacket(){
 
     }
 
-    public TextureWandModeChangePacket(FriendlyByteBuf buf){
+    public WandSwapModePacket(FriendlyByteBuf buf){
 
     }
 
@@ -31,7 +30,8 @@ public class TextureWandModeChangePacket {
             ServerLevel level = player.getLevel();
 
             ItemStack item = player.getMainHandItem();
-            ((AbstractWand) item.getItem()).switchPaletteMode(player);
+
+            ((AbstractWand) item.getItem()).switchSwapMode(item);
         });
         return true;
 

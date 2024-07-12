@@ -15,8 +15,8 @@ import java.util.List;
 public class ControlPoint {
     Vec3 centerpoint;
     double centerradius = 0.2;
-    double arrowx = 0.05;
-    double arrowy = 0.3;
+    double arrowx = 0.1;
+    double arrowy = 0.5;
 
     public int idx;
 

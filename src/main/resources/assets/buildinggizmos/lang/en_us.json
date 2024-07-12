@@ -1,8 +1,28 @@
 {
-  "item.buildinggizmos.testitem": "TEST ITEM",
+  "item.buildinggizmos.buildwand": "Building Gizmo",
+  "item.buildinggizmos.texturewand": "Texturing Gizmo",
   "itemGroup.buildinggizmostab": "Building Gizmos",
 
   "key.category.buildinggizmos.buildinggizmos": "Building Gizmos",
   "key.buildinggizmos.mode_switch": "Switch Placement Mode",
-  "key.buildinggizmos.pallet_menu":"Open BlockPallet Menu"
+  "key.buildinggizmos.pallet_menu":"Open BlockPalette Menu",
+  "key.buildinggizmos.shape_switch":"Cycle Shape",
+  "key.buildinggizmos.build":"Build Shape",
+  "key.buildinggizmos.placementmode":"Cycle Gradient Mode",
+  "key.buildinggizmos.swapmode":"Cycle Swap/Place Mode",
+
+  "buildinggizmos.modeswap":"Swap",
+  "buildinggizmos.modebuild":"Place",
+  "buildinggizmos.modeswapandbuild":"Swap and Place",
+  "buildinggizmos.moderandom":"Random",
+  "buildinggizmos.modegradient":"Gradient",
+  "buildinggizmos.hotbar":"Hotbar",
+  "buildinggizmos.palettemenu":"Palette Menu",
+
+  "buildinggizmos.shapeline": "Line",
+  "buildinggizmos.shapecircle": "Circle",
+  "buildinggizmos.shapecat": "Catenary",
+  "buildinggizmos.shapecube": "Filled Cube",
+  "buildinggizmos.shapebez2": "Quadratic Bezier Curve",
+  "buildinggizmos.shapebez3": "Cubic Bezier Curve"
 }

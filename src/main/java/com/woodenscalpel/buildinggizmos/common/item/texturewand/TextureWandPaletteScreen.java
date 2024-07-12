@@ -138,7 +138,7 @@ public class TextureWandPaletteScreen extends Screen {
         searchFrameX = selectedblockframeX;
         searchFrameY = selectedblockframeY + selectedblockframeH + framepadding;
         searchFrameW = selectedblockframeW;
-        searchFrameH = height - framepadding - searchFrameY;
+        searchFrameH = height - searchFrameY;
 
         //Pallet Frame
 
@@ -187,7 +187,8 @@ public class TextureWandPaletteScreen extends Screen {
         addRenderableWidget(new Button(paletteFrameX+borderpadding, paletteFrameY + paletteFrameH -addButtonH - borderpadding,addButtonW,addButtonH,Component.literal("Remove"), btn -> {
             if(testBlockList.size() > testScrollWidget.selectedslot) {
                 testBlockList.remove(testScrollWidget.getScrollN()+testScrollWidget.selectedslot);
-                if(testScrollWidget.getN() > 0){
+                //if(testScrollWidget.getN() > 0){
+                if(testScrollWidget.scrollSubWidget.scrollslot > 0){
                     testScrollWidget.setN(testScrollWidget.getN()-1);
                     testScrollWidget.scrollSubWidget.scrolltoN(testScrollWidget.getScrollN()-1);
                 }
@@ -360,13 +361,13 @@ public class TextureWandPaletteScreen extends Screen {
             });
 
             int resultW = fullwidth;
-            int resultH = fullheight-3*buttonH-blockinfoH-border*4-textsize;//120;
+            int resultH = fullheight-3*buttonH-blockinfoH-border*5-textsize;//120;
             int numslots =3;
             int buffer = 3;
 
-            results = new ScrollWidgetList(fullx+border,fully+border*4+blockinfoH+buttonH*2,resultW,resultH,numslots,buffer);
+            results = new ScrollWidgetList(fullx+border,fully+border*3+blockinfoH+buttonH*2,resultW,resultH,numslots,buffer);
 
-            addPaletteButton = new Button(fullx+border,fully+border*5+blockinfoH+buttonH*2+resultH,buttonW*3,buttonH,Component.literal("Add Selected Block to Pallet"),btn ->{
+            addPaletteButton = new Button(fullx+border,fully+border*3+blockinfoH+buttonH*2+resultH,buttonW*3,buttonH,Component.literal("Add Selected Block to Palette"),btn ->{
                 int index =  this.results.scrollSubWidget.scrollslot + this.results.selectedslot;
                 if (index >= 0 && index < this.searchresults.size()){
                 Block addblock = this.searchresults.get(this.results.scrollSubWidget.scrollslot+this.results.selectedslot).getFirst();
@@ -391,6 +392,11 @@ public class TextureWandPaletteScreen extends Screen {
 
 
         public int getScrollN() {
+            int n = this.results.getScrollN();
+            if(n<0){
+                results.scrollSubWidget.scrollslot = 0;
+                return 0;
+            }
             return this.results.getScrollN();
         }
 

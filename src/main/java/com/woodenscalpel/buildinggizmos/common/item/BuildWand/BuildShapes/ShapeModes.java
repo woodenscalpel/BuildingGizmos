@@ -8,6 +8,7 @@ import com.woodenscalpel.buildinggizmos.misc.Quantization.UnoptimizedFunctionDra
 import com.woodenscalpel.buildinggizmos.misc.helpers;
 import com.woodenscalpel.buildinggizmos.misc.shapes.Box;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 
@@ -17,11 +18,13 @@ import java.util.List;
 import static com.woodenscalpel.buildinggizmos.misc.helpers.blockPostoVec3;
 
 public enum ShapeModes {
-    LINE(2),CIRCLE(2),CAT(2),CUBICBEZIER(2),QUADBEZIER(2),FILLEDCUBE(2);
+    LINE(2,"shapeline"),CIRCLE(2,"shapecircle"),CAT(2,"shapecat"),CUBICBEZIER(2,"shapebez3"),QUADBEZIER(2,"shapebez2"),FILLEDCUBE(2,"shapecube");
 
     private final int npoints;
-    ShapeModes(int Npoints){
+    public final String name;
+    ShapeModes(int Npoints, String pname){
         npoints = Npoints;
+        name = "buildinggizmos."+pname;
 
     }
 

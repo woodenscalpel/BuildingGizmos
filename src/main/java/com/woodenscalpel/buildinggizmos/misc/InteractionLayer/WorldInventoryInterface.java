@@ -66,12 +66,25 @@ public class WorldInventoryInterface {
     }
 
     public static boolean hasItem(Player player, ItemStack item) {
-
+        if(item == ItemStack.EMPTY){
+            return false;
+        }
         return player.getInventory().contains(item);
     }
 
     public static void removeItem(Player player, ItemStack item) {
         int slot = player.getInventory().findSlotMatchingItem(item);
         player.getInventory().getItem(slot).shrink(1);
+    }
+
+    public static void swaporPlaceBlock(Player player, ItemStack item, Level level, BlockPos pos) {
+        if(canDestroy(level,pos) && (validSwap(level,pos) || canPlace(level,pos)) &&(hasItem(player,item) || player.isCreative())){
+            destroyBlock(player,level,pos,true);
+            if(!player.isCreative()) {
+                removeItem(player, item);
+            }
+            placeBlock(player, item, level, pos);
+        }
+
     }
 }

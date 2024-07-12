@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " r#",
+    " /r",
+    "/  "
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:diamond"
+    },
+    "/": {
+      "item": "minecraft:stick"
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "buildinggizmos:buildwand"
+  }
+}

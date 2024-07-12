@@ -1,9 +1,7 @@
 package com.woodenscalpel.buildinggizmos.networking;
 
 import com.woodenscalpel.buildinggizmos.BuildingGizmos;
-import com.woodenscalpel.buildinggizmos.networking.packet.BuildWandShapeChangePacket;
-import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandModeChangePacket;
-import com.woodenscalpel.buildinggizmos.networking.packet.TextureWandPalletClosePacket;
+import com.woodenscalpel.buildinggizmos.networking.packet.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -45,6 +43,21 @@ public class Messages {
                 .decoder(BuildWandShapeChangePacket::new)
                 .encoder(BuildWandShapeChangePacket::toBytes)
                 .consumerMainThread(BuildWandShapeChangePacket::handle).add();
+
+        net.messageBuilder(WandBuildPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(WandBuildPacket::new)
+                .encoder(WandBuildPacket::toBytes)
+                .consumerMainThread(WandBuildPacket::handle).add();
+
+        net.messageBuilder(WandPlacementModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(WandPlacementModePacket::new)
+                .encoder(WandPlacementModePacket::toBytes)
+                .consumerMainThread(WandPlacementModePacket::handle).add();
+
+        net.messageBuilder(WandSwapModePacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(WandSwapModePacket::new)
+                .encoder(WandSwapModePacket::toBytes)
+                .consumerMainThread(WandSwapModePacket::handle).add();
     }
 
     public static <MSG> void sendToServer(MSG message){

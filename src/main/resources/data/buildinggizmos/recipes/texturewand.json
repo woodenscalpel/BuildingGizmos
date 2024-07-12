@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " r#",
+    " /r",
+    "/  "
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:emerald"
+    },
+    "/": {
+      "item": "minecraft:stick"
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "buildinggizmos:texturewand"
+  }
+}
