@@ -41,9 +41,9 @@ import java.util.Objects;
 public abstract class AbstractWand extends Item implements PaletteInterface{
 
     //State machine states
-    static final int SELECTING = 0;
-    static final int IN_USE = 1;
-    static final String activeStateTag = "state";
+    protected static final int SELECTING = 0;
+    protected static final int IN_USE = 1;
+    protected static final String activeStateTag = "state";
 
     //Palette modes
     static final String modeTag = "MODE";

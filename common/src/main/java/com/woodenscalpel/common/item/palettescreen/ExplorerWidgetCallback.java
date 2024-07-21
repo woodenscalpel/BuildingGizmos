@@ -3,12 +3,15 @@ package com.woodenscalpel.common.item.palettescreen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import com.woodenscalpel.BuildingGizmos;
 import com.woodenscalpel.misc.SetBlockInterface;
 import com.woodenscalpel.misc.helpers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -133,33 +136,8 @@ public class ExplorerWidgetCallback extends AbstractWidget {
     }
 
     private void drawTexture(GuiGraphics poseStack,Block block, Vec3 coord) {
-        drawTexture(poseStack, (int) coord.x, (int) coord.y, (int) coord.z,block, Direction.EAST);
+        DrawTextureHelper.drawTexture(poseStack, (int) coord.x, (int) coord.y, (int) coord.z,block,Direction.EAST,0.7F);
     }
-
-    private void drawTexture(GuiGraphics gui, int interpolatedx, int interpolatedy,int interpolatedz, Block block, Direction direction) {
-            ResourceLocation texture2 = helpers.getBlockTexture(block, direction).atlasLocation();
-
-            float arbitraryscale = 0.7F;
-
-            float int3 = helpers.getBlockTexture(block, direction).getU0();
-            float int4 = helpers.getBlockTexture(block, direction).getU1();
-            float int5 = helpers.getBlockTexture(block, direction).getV0();
-            float int6 = helpers.getBlockTexture(block, direction).getV1();
-            float ratio = helpers.getBlockTexture(block, direction).uvShrinkRatio();
-
-            int vsize = (int) ((int6 - int5) / ratio);
-            int usize = (int) ((int4 - int3) / ratio);
-
-
-            RenderSystem.setShaderTexture(0, texture2);
-            gui.pose().pushPose();
-            gui.pose().scale(2*arbitraryscale,1*arbitraryscale,1);
-            //blit(poseStack, interpolatedx/2, interpolatedy, (int) (int3 / ratio), (int) (int5 / ratio), usize, vsize);
-            gui.blit(texture2, (int) (interpolatedx/(2*arbitraryscale)), (int) (interpolatedy/arbitraryscale), interpolatedz, int3/ratio, int5/ratio, usize, vsize, 256, 256);
-            gui.pose().popPose();
-
-        }
-
 
     @Override
     public void mouseMoved(double pMouseX, double pMouseY) {

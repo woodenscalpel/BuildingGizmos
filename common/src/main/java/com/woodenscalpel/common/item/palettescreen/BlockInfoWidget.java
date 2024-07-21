@@ -82,8 +82,7 @@ public class BlockInfoWidget extends AbstractWidget {
 
         //Draw Texture
 
-        DrawTextureHelper textureHelper = new DrawTextureHelper();
-        textureHelper.drawTexture(guiGraphics,texturestartx,texturestarty,0,block, Direction.SOUTH, scalefactor);
+        DrawTextureHelper.drawTexture(guiGraphics,texturestartx,texturestarty,0,block, Direction.SOUTH, scalefactor);
 
         //Draw RGB Text
 

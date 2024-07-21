@@ -5,13 +5,13 @@
   "name": "Building Gizmos",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
-    "Me!"
+    "WoodenScalpel"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
-  "license": "CC0-1.0",
+  "license": "GPLv3",
   "icon": "assets/building_gizmos/icon.png",
   "environment": "*",
   "entrypoints": {
@@ -33,5 +33,6 @@
   },
   "suggests": {
     "another-mod": "*"
-  }
+  },
+  "accessWidener": "buildinggizmos.accesswidener"
 }

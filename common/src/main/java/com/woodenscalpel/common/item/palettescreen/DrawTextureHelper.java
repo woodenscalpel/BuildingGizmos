@@ -12,9 +12,8 @@ import org.slf4j.Logger;
 
 public class DrawTextureHelper {
 
-    private static final Logger LOGGER = LogUtils.getLogger();
 
-    public void drawTexture(GuiGraphics gui , int interpolatedx, int interpolatedy, int interpolatedz, Block block, Direction direction, float scale) {
+    public static void drawTexture(GuiGraphics gui , int interpolatedx, int interpolatedy, int interpolatedz, Block block, Direction direction, float scale) {
         ResourceLocation texture2 = helpers.getBlockTexture(block, direction).atlasLocation();
 
         float int3 = helpers.getBlockTexture(block, direction).getU0();
@@ -28,10 +27,11 @@ public class DrawTextureHelper {
 
         RenderSystem.setShaderTexture(0, texture2);
         gui.pose().pushPose();
-        gui.pose().scale(2*scale,1*scale,1);
+        gui.pose().scale(scale,scale,1);
         //blit(poseStack, interpolatedx/2, interpolatedy, (int) (int3 / ratio), (int) (int5 / ratio), usize, vsize);
 
-        gui.blit(texture2, (int) (interpolatedx/(2*scale)), (int) (interpolatedy/scale), interpolatedz, int3/ratio, int5/ratio, usize, vsize, 256, 256);
+        gui.blit((int) (interpolatedx/scale),(int) (interpolatedy/scale),interpolatedz,8,8,helpers.getBlockTexture(block,direction));
+        //gui.blit(texture2, (int) (interpolatedx/(2*scale)), (int) (interpolatedy/scale), interpolatedz, int3/ratio, int5/ratio, usize, vsize, 256, 256);
         gui.pose().popPose();
 
     }
