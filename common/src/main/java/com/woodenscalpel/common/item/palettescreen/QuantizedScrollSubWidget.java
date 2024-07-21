@@ -26,7 +26,7 @@ public class QuantizedScrollSubWidget extends AbstractWidget {
         super(pX, pY, pWidth, pHeight, pMessage);
         this.Nslots = Nslots;
         this.scrollslot = 0;
-        this.scrolldrawposoffset = (this.height)/(Nslots+1);
+        this.scrolldrawposoffset = Math.max((this.height)/(Nslots+1),1);
     }
 
     public int getN(){
@@ -35,7 +35,7 @@ public class QuantizedScrollSubWidget extends AbstractWidget {
 
     public void setN(int n) {
         this.Nslots = n;
-        this.scrolldrawposoffset = (this.height)/(n+1);
+        this.scrolldrawposoffset = Math.max((this.height)/(n+1),1);
     }
 
     int getNfromPos(int pos) {
