@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+#issueTrackerURL = ""
+license = "GPLv3"
+
+[[mods]]
+modId = "buildinggizmos"
+version = "${version}"
+displayName = "Building Gizmos"
+authors = "WoodenScalpel"
+description = '''
+Adds building tools that can make shapes and gradients.
+'''
+
+#logoFile = ""
+
+[[dependencies.buildinggizmos]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.buildinggizmos]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.buildinggizmos]]
+modId = "architectury"
+mandatory = true
+versionRange = "[9.2.14,)"
+ordering = "AFTER"
+side = "BOTH"
